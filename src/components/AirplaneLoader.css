@@ -1,0 +1,171 @@
+.pre-loader {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999991;
+  background-color: var(--wdtBodyBGColor, #ffffff);
+  -webkit-transition: all 0.05s ease-in-out;
+  transition: all 0.05s ease-in-out;
+  backface-visibility: hidden;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  will-change: transform;
+  justify-content: center;
+}
+
+.loader2 {
+  background-color: var(--wdtBodyBGColor, #ffffff);
+  transition: transform 1s ease-in-out;
+  transform: translateX(100%);
+  will-change: transform;
+}
+
+.loader2.active {
+  transform: translateX(0);
+}
+
+.loader2.exiting {
+  transform: translateX(0);
+  transition: transform 0.8s ease-in-out;
+}
+
+.loader2.exit {
+  transform: translateX(100%);
+  transition: transform 0.8s ease-in-out;
+}
+
+.loader-inner {
+  padding: 25px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Updated animation: original entry + shake + rotation + curved upward exit */
+.wdt__start .loader-icon {
+  animation: completeFlightSequence 6s ease-in-out forwards;
+}
+
+.loader-icon .wdt-planebody {
+  position: relative;
+  width: var(--size, 100px);
+  aspect-ratio: 7/1;
+  border-bottom-left-radius: 50% 100%;
+  border-top-right-radius: 25% 90%;
+  border-bottom-right-radius: 20% 20%;
+  background: var(--planeColor, #06b6d4);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.loader-icon .wdt-planebody,
+.loader-icon .wdt-planebody * {
+  background: var(--planeColor, #06b6d4);
+}
+
+.loader-icon .wdt-planetail {
+  position: absolute;
+  left: calc(-0.3% + 1px);
+  top: -120%;
+  width: 15%;
+  aspect-ratio: 1 / 1.25;
+  transform: skewX(0deg) translateX(-0%);
+  border-top-left-radius: 10%;
+  border-top-right-radius: 100% 100%;
+}
+
+.loader-icon .wdt-wingleft,
+.loader-icon .wdt-wingright {
+  position: absolute;
+  left: 50%;
+  width: 25%;
+  aspect-ratio: 1;
+}
+
+.loader-icon .wdt-wingleft {
+  transform-origin: bottom;
+  top: -190%;
+  transform: skewX(45deg) translateX(-30%) scale(0.8);
+  border-top-left-radius: 10%;
+  border-top-right-radius: 60% 100%;
+}
+
+.loader-icon .wdt-wingright {
+  transform-origin: top;
+  bottom: -170%;
+  transform: skewX(-45deg);
+  border-bottom-left-radius: 10%;
+  border-bottom-right-radius: 60% 100%;
+}
+
+/* Complete sequence: entry + shake + rotation + smooth upward exit */
+@keyframes completeFlightSequence {
+  /* Phase 1: Entry (0-25%) */
+  0% {
+    opacity: 0;
+    transform: translateX(-150%) translateY(0) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-10%) translateY(0) rotate(0deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* Phase 2: Shake/Hover (25-45%) */
+  35% {
+    transform: translateX(0) translateY(-5%) rotate(2deg);
+  }
+  45% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  /* Phase 3: Circular orbit rotation (45-70%) */
+  70% {
+    transform: rotate(360deg) translateX(80px) rotate(-360deg);
+  }
+
+  /* Phase 4: Exit to right side with upward movement (70-100%) */
+  75% {
+    opacity: 1;
+    transform: translateX(20%) translateY(-10%) rotate(10deg);
+  }
+  85% {
+    opacity: 0.8;
+    transform: translateX(80%) translateY(-40%) rotate(20deg);
+  }
+  95% {
+    opacity: 0.4;
+    transform: translateX(150%) translateY(-80%) rotate(30deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(200%) translateY(-120%) rotate(35deg);
+  }
+}
+
+/* Loader background exit animation */
+.loader2.exiting {
+  animation: slideOutRight 0.8s ease-in-out forwards;
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

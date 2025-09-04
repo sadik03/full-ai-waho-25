@@ -1,0 +1,293 @@
+@import "react-phone-input-2/lib/style.css";
+@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bahianita&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Boldonse&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Babylonica&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Qwigley&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Delius&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Local Great Vibes font */
+@font-face {
+  font-family: 'GreatVibes';
+  src: url('./assets/GreatVibes-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@layer base {
+  :root {
+    /* UAE Travel Theme Colors */
+    --background: 220 20% 98%;
+    --foreground: 215 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* UAE Red Primary - #B01216 */
+    --primary: 354 85% 41%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 354 80% 50%;
+
+    /* Desert Sand Secondary */
+    --secondary: 35 25% 92%;
+    --secondary-foreground: 215 25% 12%;
+
+    /* Desert Sunset Muted */
+    --muted: 25 15% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Deep Red Accent */
+    --accent: 354 70% 35%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 94%;
+    --ring: 354 85% 41%;
+
+    --radius: 0.75rem;
+
+    /* Custom Travel Theme Variables */
+    --gradient-hero: linear-gradient(135deg, hsl(354 85% 41%) 0%, hsl(354 70% 35%) 50%, hsl(354 80% 50%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(354 85% 41%) 0%, hsl(354 80% 50%) 50%, hsl(354 75% 60%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(354 85% 41%) 0%, hsl(354 70% 35%) 100%);
+    
+    /* Shadows */
+    --shadow-luxury: 0 20px 40px -12px hsl(354 85% 41% / 0.25);
+    --shadow-card: 0 4px 20px -4px hsl(220 15% 50% / 0.15);
+    --shadow-float: 0 8px 30px -8px hsl(354 85% 41% / 0.3);
+
+    /* Animation Variables */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair;
+  }
+}
+
+@layer components {
+  /* Hero Section Animations */
+  .hero-text {
+    @apply animate-fade-in;
+    animation-delay: 0.2s;
+    animation-fill-mode: both;
+  }
+
+  .hero-subtitle {
+    @apply animate-fade-in;
+    animation-delay: 0.4s;
+    animation-fill-mode: both;
+  }
+
+  .hero-button {
+    @apply animate-fade-in;
+    animation-delay: 0.6s;
+    animation-fill-mode: both;
+  }
+
+  /* Custom Button Variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-primary to-primary-glow text-primary-foreground font-semibold px-8 py-4 rounded-xl;
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-luxury;
+    @apply border border-primary/20;
+  }
+
+  .btn-secondary {
+    @apply bg-card border border-border text-card-foreground font-medium px-6 py-3 rounded-lg;
+    @apply transition-all duration-300 hover:bg-secondary hover:border-primary/30;
+    @apply shadow-card hover:shadow-float;
+  }
+
+  /* Card Variants */
+  .card-luxury {
+    @apply bg-gradient-to-br from-card to-secondary/30 border border-border/50 rounded-2xl;
+    @apply shadow-card hover:shadow-luxury transition-all duration-300;
+    @apply backdrop-blur-sm;
+  }
+
+  .card-travel {
+    @apply bg-card border border-border rounded-xl shadow-card;
+    @apply hover:shadow-float transition-all duration-300 hover:-translate-y-1;
+  }
+
+  /* Input Variants */
+  .input-travel {
+    @apply bg-input border border-border rounded-lg px-4 py-3;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply transition-all duration-200;
+  }
+
+  /* Progress Bar */
+  .progress-step {
+    @apply flex items-center space-x-2 text-muted-foreground;
+  }
+
+  .progress-step.active {
+    @apply text-primary font-medium;
+  }
+
+  .progress-step.completed {
+    @apply text-primary;
+  }
+
+  /* Floating Elements */
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-primary-glow to-primary bg-clip-text text-transparent;
+  }
+
+  /* Helper class to use local Great Vibes font */
+  .font-greatvibes {
+    font-family: 'GreatVibes', cursive;
+  }
+}
+
+ @keyframes draw {
+    0% {
+      stroke-dasharray: 0 200;
+    }
+    50% {
+      stroke-dasharray: 100 100;
+    }
+    100% {
+      stroke-dasharray: 200 0;
+    }
+  }
+
+
+/* Add to your global CSS or component styles */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(90deg); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(270deg); }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 3s ease-in-out infinite;
+}
+
+.border-l-3 {
+  border-left-width: 3px;
+}
+
+.border-t-3 {
+  border-top-width: 3px;
+}
+
+.border-r-3 {
+  border-right-width: 3px;
+}
+
+.border-b-3 {
+  border-bottom-width: 3px;
+}
+
+  

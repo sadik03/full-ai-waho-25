@@ -1,0 +1,92 @@
+/* Print styles for Reports & Analytics page */
+
+@media print {
+  /* Hide everything except the reports content */
+  body * {
+    visibility: hidden;
+  }
+  
+  #reports-content, 
+  #reports-content * {
+    visibility: visible;
+  }
+  
+  #reports-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  /* Hide action buttons and controls when printing */
+  .print-hide {
+    display: none !important;
+  }
+  
+  /* Optimize print layout */
+  .print-optimize {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  
+  /* Ensure charts are visible in print */
+  .recharts-wrapper {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  /* Optimize card layouts for print */
+  .grid {
+    display: grid !important;
+  }
+  
+  /* Ensure table fits on page */
+  table {
+    width: 100% !important;
+    font-size: 10px !important;
+  }
+  
+  th, td {
+    padding: 4px !important;
+  }
+  
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+  
+  /* Ensure colors are preserved */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  /* Hide background gradients for better printing */
+  .bg-gradient-to-br {
+    background: white !important;
+  }
+  
+  /* Optimize chart containers */
+  .recharts-responsive-container {
+    width: 100% !important;
+    height: 300px !important;
+  }
+}
+
+/* PDF export specific styles */
+.pdf-export {
+  background: white;
+  color: black;
+}
+
+.pdf-export .bg-gradient-to-br {
+  background: white !important;
+}
+
+.pdf-export .print-hide {
+  display: none !important;
+}
