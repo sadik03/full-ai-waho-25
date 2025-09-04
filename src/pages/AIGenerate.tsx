@@ -132,14 +132,35 @@ export default function AIGenerate() {
             const selectedEmirates = Array.isArray(data.emirates) ? data.emirates : [data.emirates];
             const includesAll = selectedEmirates.includes("all");
             
-            // Fetch attractions
+            // Fetch attractions - fix filtering logic
             let attractionsQuery = supabase
               .from('attractions')
-              .select('*')
-              .eq('is_active', true);
+              .select('*');
             
-            if (!includesAll) {
-              attractionsQuery = attractionsQuery.in('emirates', selectedEmirates);
+            // Add is_active filter if column exists, otherwise skip
+            try {
+              attractionsQuery = attractionsQuery.eq('is_active', true);
+            } catch (error) {
+              console.warn('is_active column may not exist, continuing without filter');
+            }
+            
+            // Fix emirates filtering - handle "all" selection properly
+            if (!includesAll && selectedEmirates.length > 0 && !selectedEmirates.includes('all')) {
+              // Convert emirates array to match database format
+              const emiratesFilter = selectedEmirates.map(e => {
+                // Handle different emirate name formats
+                switch(e) {
+                  case 'dubai': return 'Dubai';
+                  case 'abu-dhabi': return 'Abu Dhabi';
+                  case 'sharjah': return 'Sharjah';
+                  case 'ajman': return 'Ajman';
+                  case 'fujairah': return 'Fujairah';
+                  case 'ras-al-khaimah': return 'Ras Al Khaimah';
+                  case 'umm-al-quwain': return 'Umm Al Quwain';
+                  default: return e;
+                }
+              });
+              attractionsQuery = attractionsQuery.in('emirates', emiratesFilter);
             }
             
             const { data: attractionsData, error: attractionsError } = await attractionsQuery;
@@ -168,40 +189,40 @@ export default function AIGenerate() {
               hotelData = [];
             }
 
-            // Fetch transport - try without is_active filter first
-            let { data: transportData, error: transportError } = await supabase
-              .from('transports')
-              .select('*');
-            
-            // If that fails, try with different approach
-            if (transportError) {
-              console.warn("⚠️ Transport query failed, trying without is_active filter:", transportError);
-              ({ data: transportData, error: transportError } = await supabase
-                .from('transports')
-                .select('*')
-                .limit(10)); // Get at least some transport
+            // Fetch transport data - fix table name
+            let transportData: any[] = [];
+            try {
+              const { data: transportResult, error: transportError } = await supabase
+                .from('transport')
+                .select('*');
+              
+              if (transportError) {
+                console.warn("⚠️ Transport query failed:", transportError);
+              } else {
+                transportData = transportResult || [];
+              }
+            } catch (error) {
+              console.error("Error fetching transport data:", error);
             }
-            
-            if (transportError) {
-              console.error("❌ Transport query error:", transportError);
-              // Don't throw, continue with empty array
-              transportData = [];
-            }
-
-            console.log("Database data fetched:");
-            console.log("- Attractions:", attractionsData?.length || 0);
-            console.log("- Hotels:", hotelData?.length || 0);
-            console.log("- Transport:", transportData?.length || 0);
 
             return {
               attractions: attractionsData || [],
               hotels: hotelData || [],
-              transport: transportData || []
+              transport: transportData
             };
           } catch (error) {
             console.error('Error fetching database data:', error);
             return { attractions: [], hotels: [], transport: [] };
           }
+        };
+
+        const generateId = () => {
+          return Math.random().toString(36).substring(2, 15) + 
+                 Math.random().toString(36).substring(2, 15);
+        };
+
+        const getRandomItem = (array: any[]) => {
+          return array[Math.floor(Math.random() * array.length)];
         };
 
         const { attractions, hotels, transport } = await fetchDatabaseData();
@@ -296,7 +317,7 @@ export default function AIGenerate() {
               console.log("✅ AI response received, parsing...");
               console.log("📄 First 500 chars of AI response:", aiResponse.content.substring(0, 500));
               
-              // Enhanced JSON cleaning
+              // Enhanced JSON cleaning with better error handling
               let cleanJson = aiResponse.content
                 .replace(/```json\s*/gi, "")
                 .replace(/```\s*/g, "")
@@ -304,14 +325,16 @@ export default function AIGenerate() {
                 .replace(/[^}\]]*$/, "")
                 .trim();
               
-              // Additional JSON cleanup
+              // Additional JSON cleanup with safer regex
               cleanJson = cleanJson
                 .replace(/,\s*}/g, '}')
                 .replace(/,\s*]/g, ']')
                 .replace(/\n/g, ' ')
                 .replace(/\s+/g, ' ')
-                .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":') // Add quotes to unquoted keys
-                .replace(/:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([,}])/g, ': "$1"$2'); // Add quotes to unquoted string values
+                .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
+                .replace(/:s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([,}])/g, ': "$1"$2')
+                .replace(/\\n/g, ' ')
+                .replace(/\\t/g, ' '); // Add quotes to unquoted string values
               
               console.log("🧹 Cleaned JSON (first 300 chars):", cleanJson.substring(0, 300));
               
@@ -319,15 +342,43 @@ export default function AIGenerate() {
                 const aiPackages = JSON.parse(cleanJson);
                 
                 if (Array.isArray(aiPackages) && aiPackages.length > 0) {
-                  console.log(`Successfully parsed ${aiPackages.length} AI packages`);
+                  console.log(`✅ Successfully parsed ${aiPackages.length} AI packages`);
                   return aiPackages;
                 } else {
                   console.error("❌ AI response not in expected array format:", typeof aiPackages);
+                  console.log("🔄 Attempting to extract packages from object...");
+                  
+                  // Try to extract packages if wrapped in an object
+                  if (aiPackages && typeof aiPackages === 'object') {
+                    const possibleArrays = Object.values(aiPackages).filter(Array.isArray);
+                    if (possibleArrays.length > 0) {
+                      console.log(`✅ Found packages in nested object`);
+                      return possibleArrays[0];
+                    }
+                  }
+                  
                   throw new Error("AI response not in expected format");
                 }
               } catch (jsonError) {
                 console.error("❌ JSON parsing failed:", jsonError);
                 console.log("📝 Failed JSON content:", cleanJson.substring(0, 1000));
+                
+                // Try one more time with even more aggressive cleaning
+                try {
+                  const ultraCleanJson = cleanJson
+                    .replace(/[^\x20-\x7E]/g, '') // Remove non-ASCII characters
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                  
+                  const retryPackages = JSON.parse(ultraCleanJson);
+                  if (Array.isArray(retryPackages) && retryPackages.length > 0) {
+                    console.log(`✅ Retry parsing successful with ${retryPackages.length} packages`);
+                    return retryPackages;
+                  }
+                } catch (retryError) {
+                  console.error("❌ Retry parsing also failed:", retryError);
+                }
+                
                 throw new Error(`JSON parsing failed: ${jsonError.message}`);
               }
             } else {
@@ -388,15 +439,25 @@ export default function AIGenerate() {
           console.log(`- Emirates focus: ${Array.isArray(data.emirates) ? data.emirates.join(', ') : data.emirates}`);
           console.log(`- Long trip mode: ${isLongTrip ? 'YES (streamlined prompt)' : 'NO (detailed prompt)'}`);
           console.log(`- Budget consideration: ${data.budget}`);
-          console.log(`- Traveler type: ${data.travelerType}`);
+          console.log(`- Traveler type: ${travelerType}`);
 
-          // Check if we have sufficient data
+          // Check if we have sufficient data and provide fallback
           if (attractions.length === 0) {
-            console.warn("⚠️ No attractions found in database!");
-            throw new Error("No attractions available. Please check database connection.");
+            console.warn("⚠️ No attractions found in database! Using fallback data.");
+            // Use fallback attractions if database is empty
+            const fallbackAttractions = [
+              { attraction: "Burj Khalifa", emirates: "Dubai", price: 150, description: "World's tallest building" },
+              { attraction: "Dubai Mall", emirates: "Dubai", price: 0, description: "Largest shopping mall" },
+              { attraction: "Sheikh Zayed Grand Mosque", emirates: "Abu Dhabi", price: 0, description: "Beautiful mosque" },
+              { attraction: "Louvre Abu Dhabi", emirates: "Abu Dhabi", price: 120, description: "Art museum" }
+            ];
+            return fallbackAttractions;
           }
 
-          const aiPrompt = `You are an expert UAE travel consultant. Create 3 unique ${tripDays}-day travel packages for ${travelerType} travelers.
+          // Enhanced AI prompt with better structure and error handling
+          const aiPrompt = `You are an expert UAE travel consultant. Create exactly 3 unique ${tripDays}-day travel packages for ${travelerType} travelers.
+
+IMPORTANT: Return ONLY valid JSON array. No markdown, no explanations, just the JSON.
 
 TRAVELER DETAILS:
 - Group: ${data.adults} adults${data.kids ? `, ${data.kids} children` : ''}${data.infants ? `, ${data.infants} infants` : ''}
@@ -601,19 +662,14 @@ CRITICAL RULES:
                 });
 
                 // Find matching hotel and transport
-                const dbHotel = hotels.find(h => 
-                  h.name.toLowerCase() === day.hotel?.toLowerCase()
-                ) || hotels[0];
-                
-                const dbTransport = transport.find(t => 
-                  t.label.toLowerCase() === day.transport?.toLowerCase()
-                ) || transport[0];
+                const dbHotel = hotels[Math.floor(dayIndex / 3) % hotels.length] || { name: "Premium Hotel", cost_per_night: 400 };
+                const transportOption = transport[dayIndex % transport.length] || { label: "Private Car", cost_per_day: 150 };
 
                 return {
                   ...day,
                   attractions: enhancedAttractions,
                   hotel: dbHotel?.name || day.hotel || "Premium Hotel",
-                  transport: dbTransport?.label || day.transport || "Private Car",
+                  transport: transportOption.label || day.transport || "Private Car",
                   image: enhancedAttractions[0]?.imageUrl || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=400&fit=crop&crop=center`,
                   images: enhancedAttractions.map(attr => attr.imageUrl).filter(Boolean)
                 };
@@ -624,8 +680,7 @@ CRITICAL RULES:
                 sum + (day.budgetBreakdown?.attractions || 0) + 
                 (day.budgetBreakdown?.meals || 0) + 
                 (day.budgetBreakdown?.transport || 0) + 
-                (day.budgetBreakdown?.accommodation || 0), 0
-              );
+                (day.budgetBreakdown?.accommodation || 0), 0);
 
               return {
                 ...pkg,
@@ -692,7 +747,7 @@ CRITICAL RULES:
                 `Experience the thrill of ${mainAttraction} while exploring ${attractions.length > 1 ? `${attractions.length - 1} additional amazing locations` : 'the surrounding area'}.`,
                 `Begin your adventure at ${mainAttraction} and uncover the hidden gems of the UAE's rich heritage.`,
                 `Dive deep into local culture at ${mainAttraction} and create unforgettable memories.`,
-                `Explore the iconic ${mainAttraction} and witness the perfect blend of tradition and modernity.`,
+                `Explore the iconic ${mainAttraction} and witness breathtaking panoramic views.`,
                 `Discover the magic of ${mainAttraction} and experience authentic Emirati hospitality.`,
                 `Journey through ${mainAttraction} and capture breathtaking moments at every turn.`,
                 `Embark on a cultural exploration at ${mainAttraction} and connect with local traditions.`

@@ -115,6 +115,26 @@ export default {
 						height: '0'
 					}
 				},
+				'slideDown': {
+					from: {
+						height: '0',
+						opacity: '0'
+					},
+					to: {
+						height: 'var(--radix-collapsible-content-height)',
+						opacity: '1'
+					}
+				},
+				'slideUp': {
+					from: {
+						height: 'var(--radix-collapsible-content-height)',
+						opacity: '1'
+					},
+					to: {
+						height: '0',
+						opacity: '0'
+					}
+				},
 				'fade-in': {
 					'0%': {
 						opacity: '0',
@@ -174,6 +194,8 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slideDown': 'slideDown 0.3s ease-out',
+				'slideUp': 'slideUp 0.3s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out',
 				'slide-up': 'slide-up 0.4s ease-out',
 				'float': 'float 3s ease-in-out infinite',

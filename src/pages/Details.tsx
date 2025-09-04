@@ -85,7 +85,7 @@ const AttractionImage = ({ attractionName, className }: { attractionName: string
 export default function Details() {
 
   const navigate = useNavigate();
-  const [expandedDay, setExpandedDay] = useState("day-1");
+  const [expandedDays, setExpandedDays] = useState({});
   const [showCustomize, setShowCustomize] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [itinerary, setItinerary] = useState([]);
@@ -281,7 +281,15 @@ export default function Details() {
   }, [currentImageIndex, allImages]);
 
   const toggleDay = (dayId) => {
-    setExpandedDay((prev) => (prev === dayId ? null : dayId));
+    console.log('Toggling day:', dayId);
+    setExpandedDays((prev) => {
+      const newState = {
+        ...prev,
+        [dayId]: !prev[dayId]
+      };
+      console.log('New expanded state:', newState);
+      return newState;
+    });
   };
 
   const handleCustomize = (day) => {
@@ -511,14 +519,14 @@ export default function Details() {
                     <div
                       className="absolute left-1/2 -ml-1.5 top-0 w-3 bg-gradient-to-b from-[#2C3D4F] via-[#1A252F] to-[#0F1419] z-0 transition-all duration-500 ease-in-out rounded-full shadow-md shadow-[#2C3D4F]/30"
                       style={{
-                        height: expandedDay === day.id ? "100%" : "60px",
+                        height: expandedDays[day.id] ? "100%" : "60px",
                       }}
                     />
                     
                     {/* Timeline connector dots */}
                     <div className="absolute left-1/2 -ml-2 w-4 h-4 bg-[#2C3D4F] rounded-full z-10 shadow-sm" style={{ top: '30px' }}></div>
                     {/* Expanded timeline decorations */}
-                    {expandedDay === day.id && (
+                    {expandedDays[day.id] && (
                       <>
                         <div className="absolute left-1/2 -ml-1.5 w-3 h-3 bg-[#2C3D4F] rounded-full z-10 shadow-sm" style={{ top: '120px' }}></div>
                         <div className="absolute left-1/2 -ml-1.5 w-3 h-3 bg-[#2C3D4F] rounded-full z-10 shadow-sm" style={{ top: '200px' }}></div>
@@ -578,16 +586,8 @@ export default function Details() {
                     >
                       {/* Elegant border highlight */}
                       <div className="absolute inset-0 rounded-lg sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-stone-300/15 to-transparent"></div>
-                      <Collapsible
-                        open={expandedDay === day.id}
-                        onOpenChange={() => toggleDay(day.id)}
-                      >
-                        <CollapsibleTrigger className="w-full">
-                          <motion.div 
-                            className="hover:bg-white/20 transition-colors cursor-pointer p-3 sm:p-4 relative"
-                            whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.25)" }}
-                            transition={{ duration: 0.3 }}
-                          >
+                      <details className="group">
+                        <summary className="w-full hover:bg-white/20 transition-colors cursor-pointer p-3 sm:p-4 relative list-none [&::-webkit-details-marker]:hidden">
                             <div className="flex flex-col space-y-3">
                               <div className="text-left pl-12 sm:pl-0">
                                 <h3 
@@ -609,27 +609,14 @@ export default function Details() {
                               </div>
                               
                               <div className="flex justify-end items-center">
-                                <motion.div
-                                  animate={{ rotate: expandedDay === day.id ? 180 : 0 }}
-                                  transition={{ duration: 0.3 }}
-                                  className="bg-white/30 p-1 rounded-full backdrop-blur-sm"
-                                >
+                                <div className="bg-white/30 p-1 rounded-full backdrop-blur-sm group-open:rotate-180 transition-transform duration-300">
                                   <ChevronDown className="w-4 sm:w-5 h-4 sm:h-5 text-[#2C3D4F]" />
-                                </motion.div>
+                                </div>
                               </div>
                             </div>
-                          </motion.div>
-                        </CollapsibleTrigger>
+                        </summary>
 
-                        <AnimatePresence>
-                          {expandedDay === day.id && (
-                            <CollapsibleContent forceMount>
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.5, ease: "easeInOut" }}
-                              >
+                        <div className="pb-4">
                                 <CardContent className="pt-0">
                                   <div className="border-t border-[#AD803B]/30 pt-4 bg-white/60 backdrop-blur-sm rounded-b-2xl sm:rounded-b-3xl">
                                     
@@ -645,9 +632,18 @@ export default function Details() {
                                           <span className="text-sm sm:text-base">Attractions & Activities</span>
                                         </h3>
                                         <div className="space-y-2 sm:space-y-3">
-                                          {day.attractions?.map((attraction, i) => (
+                                          {day.attractions?.reduce((unique, attraction, index) => {
+                                            const isDuplicate = unique.some(item => 
+                                              item.name?.toLowerCase() === attraction.name?.toLowerCase() ||
+                                              (item.name === attraction.name && item.type === attraction.type)
+                                            );
+                                            if (!isDuplicate) {
+                                              unique.push(attraction);
+                                            }
+                                            return unique;
+                                          }, []).map((attraction, i) => (
                                             <motion.div 
-                                              key={i} 
+                                              key={`${day.id}-attraction-${i}-${attraction.name || i}`} 
                                               className="bg-white/90 backdrop-blur-lg border border-[#AD803B]/20 p-3 sm:p-4 hover:border-[#AD803B]/60 hover:shadow-lg transition-all duration-500 shadow-md rounded-lg"
                                               whileHover={{ scale: 1.01, y: -1 }}
                                               transition={{ duration: 0.2 }}
@@ -720,7 +716,13 @@ export default function Details() {
                                               </div>
                                             </CollapsibleTrigger>
                                             <CollapsibleContent>
-                                              <div className="border-t border-[#AD803B]/20 p-3 sm:p-4 bg-white/30">
+                                              <motion.div 
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="border-t border-[#AD803B]/20 p-3 sm:p-4 bg-white/30"
+                                              >
                                                 {/* Hotel Selection Dropdown */}
                                                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                                                   <h5 className="text-xs font-semibold text-[#2C3D4F] mb-2">Choose Hotel:</h5>
@@ -746,7 +748,7 @@ export default function Details() {
                                                             {/* <p className="text-xs text-[#2C3D4F] mt-1">{hotel.location}</p> */}
                                                             <div className="flex items-center mt-1">
                                                               {[...Array(hotel.stars || 5)].map((_, i) => (
-                                                                <Star key={i} className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#AD803B] fill-current" />
+                                                                <Star key={`hotel-${hotel.id || hotelIndex}-star-${i}`} className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#AD803B] fill-current" />
                                                               ))}
                                                             </div>
                                                           </div>
@@ -761,7 +763,7 @@ export default function Details() {
                                                         </div>
                                                         {/* <div className="mt-2 flex flex-wrap gap-1">
                                                           {(hotel.amenities || ["WiFi", "Pool", "Gym"]).slice(0, 3).map((amenity, i) => (
-                                                            <span key={i} className="text-xs bg-[#2C3D4F]/10 text-[#2C3D4F] px-1.5 py-0.5 rounded">
+                                                            <span key={`hotel-${hotel.id || hotelIndex}-amenity-${i}-${amenity}`} className="text-xs bg-[#2C3D4F]/10 text-[#2C3D4F] px-1.5 py-0.5 rounded">
                                                               {amenity}
                                                             </span>
                                                           ))}
@@ -788,14 +790,14 @@ export default function Details() {
                                                         <span className="text-xs font-medium text-[#2C3D4F]">Rating:</span>
                                                         <div className="flex items-center">
                                                           {[1, 2, 3, 4, 5].map((star) => (
-                                                            <Star key={star} className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#AD803B] fill-current" />
+                                                            <Star key={`rating-star-${star}`} className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#AD803B] fill-current" />
                                                           ))}
                                                         </div>
                                                       </div>
                                                     </div>
                                                   </div>
                                                 )}
-                                              </div>
+                                              </motion.div>
                                             </CollapsibleContent>
                                           </Collapsible>
                                         </div>
@@ -828,7 +830,13 @@ export default function Details() {
                                               </div>
                                             </CollapsibleTrigger>
                                             <CollapsibleContent>
-                                              <div className="border-t border-[#AD803B]/20 p-3 sm:p-4 bg-white/30">
+                                              <motion.div 
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="border-t border-[#AD803B]/20 p-3 sm:p-4 bg-white/30"
+                                              >
                                                 {/* Transport Selection Dropdown */}
                                                 <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                                                   <h5 className="text-xs font-semibold text-[#2C3D4F] mb-2">Choose Transportation:</h5>
@@ -867,7 +875,7 @@ export default function Details() {
                                                         </div>
                                                         <div className="mt-2 flex flex-wrap gap-1">
                                                           {(transport.features || ["Driver", "Fuel", "Insurance"]).slice(0, 3).map((feature, i) => (
-                                                            <span key={i} className="text-xs bg-[#2C3D4F]/10 text-[#2C3D4F] px-1.5 py-0.5 rounded">
+                                                            <span key={`transport-${transport.id}-feature-${i}-${feature}`} className="text-xs bg-[#2C3D4F]/10 text-[#2C3D4F] px-1.5 py-0.5 rounded">
                                                               {feature}
                                                             </span>
                                                           ))}
@@ -899,7 +907,7 @@ export default function Details() {
                                                     </div>
                                                   </div>
                                                 )}
-                                              </div>
+                                              </motion.div>
                                             </CollapsibleContent>
                                           </Collapsible>
                                         </div>
@@ -966,11 +974,8 @@ export default function Details() {
                                     </div>
                                   </div>
                                 </CardContent>
-                              </motion.div>
-                            </CollapsibleContent>
-                          )}
-                        </AnimatePresence>
-                      </Collapsible>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </motion.div>
