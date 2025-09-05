@@ -103,6 +103,7 @@ export default function Details() {
   const [expandedTransportCard, setExpandedTransportCard] = useState(null);
   const [hotelData, setHotelData] = useState([]);
   const [transportData, setTransportData] = useState([]);
+  const [attractionsData, setAttractionsData] = useState([]);
 
   // Fetch data from Supabase
   useEffect(() => {
@@ -128,6 +129,18 @@ export default function Details() {
           console.error('Error fetching transport:', transportError);
         } else {
           setTransportData(transport || []);
+        }
+
+        // Fetch attractions with emirates data
+        const { data: attractions, error: attractionsError } = await supabase
+          .from('attractions')
+          .select('*');
+        
+        if (attractionsError) {
+          console.error('Error fetching attractions:', attractionsError);
+        } else {
+          setAttractionsData(attractions || []);
+          console.log('Loaded attractions from Supabase:', attractions);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -595,6 +608,80 @@ export default function Details() {
                                   style={{ fontFamily: 'Nunito, sans-serif', letterSpacing: '-0.01em' }}
                                 >
                                   {day.title}
+                                  {day.attractions && day.attractions.length > 0 && (() => {
+                                    console.log(`=== Day ${day.day} Emirates Detection ===`);
+                                    console.log('Day attractions:', day.attractions);
+                                    
+                                    const emirates = [...new Set(day.attractions.map((attr, index) => {
+                                      console.log(`Attraction ${index + 1}:`, {
+                                        name: attr.name,
+                                        emirates: attr.emirates,
+                                        emirate: attr.emirate,
+                                        location: attr.location,
+                                        fullObject: attr
+                                      });
+                                      
+                                      // Priority 1: Direct emirates property from attraction data
+                                      if (attr.emirates && attr.emirates !== 'UAE') {
+                                        console.log(`✅ Found direct emirates: ${attr.emirates}`);
+                                        return attr.emirates;
+                                      }
+                                      
+                                      // Priority 2: Look up in Supabase attractions data
+                                      const dbAttraction = attractionsData.find(dbAttr => 
+                                        dbAttr.attraction && attr.name && (
+                                          dbAttr.attraction.toLowerCase() === attr.name.toLowerCase() ||
+                                          attr.name.toLowerCase().includes(dbAttr.attraction.toLowerCase()) ||
+                                          dbAttr.attraction.toLowerCase().includes(attr.name.toLowerCase())
+                                        )
+                                      );
+                                      
+                                      if (dbAttraction && dbAttraction.emirates && dbAttraction.emirates !== 'UAE') {
+                                        console.log(`✅ Found emirates from Supabase: ${dbAttraction.emirates} for ${attr.name}`);
+                                        return dbAttraction.emirates;
+                                      }
+                                      
+                                      // Priority 3: Other location properties
+                                      if (attr.emirate && attr.emirate !== 'UAE') return attr.emirate;
+                                      if (attr.location && attr.location !== 'UAE') return attr.location;
+                                      if (attr.city && attr.city !== 'UAE') return attr.city;
+                                      if (attr.region && attr.region !== 'UAE') return attr.region;
+                                      
+                                      // Priority 4: Fallback name-based detection (reduced reliance)
+                                      const name = (attr.name || '').toLowerCase();
+                                      console.log(`🔍 Fallback name analysis: "${name}"`);
+                                      
+                                      // Key attractions only for fallback
+                                      if (name.includes('burj khalifa')) return 'Dubai';
+                                      if (name.includes('dubai mall')) return 'Dubai';
+                                      if (name.includes('sheikh zayed') || name.includes('grand mosque')) return 'Abu Dhabi';
+                                      if (name.includes('ferrari world')) return 'Abu Dhabi';
+                                      if (name.includes('louvre abu dhabi')) return 'Abu Dhabi';
+                                      if (name.includes('dubai') && !name.includes('abu dhabi')) return 'Dubai';
+                                      if (name.includes('abu dhabi')) return 'Abu Dhabi';
+                                      if (name.includes('sharjah')) return 'Sharjah';
+                                      if (name.includes('ajman')) return 'Ajman';
+                                      if (name.includes('fujairah')) return 'Fujairah';
+                                      if (name.includes('ras al khaimah')) return 'Ras Al Khaimah';
+                                      if (name.includes('umm al quwain')) return 'Umm Al Quwain';
+                                      
+                                      console.log(`⚠️ No emirate found in Supabase or fallback for: ${name}`);
+                                      return null;
+                                    }).filter(Boolean))];
+                                    
+                                    console.log(`📍 Final emirates for Day ${day.day}:`, emirates);
+                                    console.log('=================================');
+                                    
+                                    return emirates.length > 0 ? (
+                                      <span className="text-sm font-medium text-[#AD803B] ml-2">
+                                        • {emirates.join(', ')}
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-medium text-[#AD803B] ml-2">
+                                        • UAE
+                                      </span>
+                                    );
+                                  })()}
                                 </h3>
                                 <div className="flex flex-wrap gap-2 sm:gap-3 text-[#2C3D4F] mt-1 text-xs sm:text-sm font-medium">
                                   <div className="flex items-center bg-white/40 px-2 py-1 rounded-full backdrop-blur-sm">
@@ -676,6 +763,54 @@ export default function Details() {
                                                     <Badge variant="secondary" className="bg-[#2C3D4F]/10 text-[#2C3D4F] border-[#2C3D4F]/30 font-medium text-xs">
                                                       {attraction.type}
                                                     </Badge>
+                                                    {(() => {
+                                                      // Get emirate for this specific attraction
+                                                      let emirate = null;
+                                                      
+                                                      // Priority 1: Direct emirates property
+                                                      if (attraction.emirates && attraction.emirates !== 'UAE') {
+                                                        emirate = attraction.emirates;
+                                                      }
+                                                      // Priority 2: Supabase lookup
+                                                      else {
+                                                        const dbAttraction = attractionsData.find(dbAttr => 
+                                                          dbAttr.attraction && attraction.name && (
+                                                            dbAttr.attraction.toLowerCase() === attraction.name.toLowerCase() ||
+                                                            attraction.name.toLowerCase().includes(dbAttr.attraction.toLowerCase()) ||
+                                                            dbAttr.attraction.toLowerCase().includes(attraction.name.toLowerCase())
+                                                          )
+                                                        );
+                                                        
+                                                        if (dbAttraction && dbAttraction.emirates && dbAttraction.emirates !== 'UAE') {
+                                                          emirate = dbAttraction.emirates;
+                                                        }
+                                                        // Priority 3: Other properties
+                                                        else if (attraction.emirate && attraction.emirate !== 'UAE') {
+                                                          emirate = attraction.emirate;
+                                                        }
+                                                        else if (attraction.location && attraction.location !== 'UAE') {
+                                                          emirate = attraction.location;
+                                                        }
+                                                        // Priority 4: Name-based fallback
+                                                        else {
+                                                          const name = (attraction.name || '').toLowerCase();
+                                                          if (name.includes('burj khalifa') || name.includes('dubai mall')) emirate = 'Dubai';
+                                                          else if (name.includes('sheikh zayed') || name.includes('ferrari world')) emirate = 'Abu Dhabi';
+                                                          else if (name.includes('dubai') && !name.includes('abu dhabi')) emirate = 'Dubai';
+                                                          else if (name.includes('abu dhabi')) emirate = 'Abu Dhabi';
+                                                          else if (name.includes('sharjah')) emirate = 'Sharjah';
+                                                          else if (name.includes('ajman')) emirate = 'Ajman';
+                                                          else if (name.includes('fujairah')) emirate = 'Fujairah';
+                                                          else if (name.includes('ras al khaimah')) emirate = 'Ras Al Khaimah';
+                                                        }
+                                                      }
+                                                      
+                                                      return emirate ? (
+                                                        <Badge className="bg-[#AD803B]/10 text-[#AD803B] border-[#AD803B]/30 font-medium text-xs">
+                                                          📍 {emirate}
+                                                        </Badge>
+                                                      ) : null;
+                                                    })()}
                                                   </div>
                                                 </div>
                                               </div>

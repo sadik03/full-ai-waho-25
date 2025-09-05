@@ -225,6 +225,90 @@ export default function AIGenerate() {
           return array[Math.floor(Math.random() * array.length)];
         };
 
+        // User-specific random filtering system with session variation
+        const generateRandomAttractions = () => {
+          console.log("🎲 Generating user-specific random attractions");
+          
+          // Create user-specific seed for consistent randomization per session
+          const userSeed = Date.now() + Math.random() * 1000000;
+          const sessionId = Math.floor(userSeed).toString(36);
+          
+          // Expanded attraction templates for more variety
+          const attractionTemplates = [
+            { name: "Burj Khalifa", emirates: "Dubai", category: "Architecture", priceRange: [100, 200] },
+            { name: "Dubai Mall", emirates: "Dubai", category: "Shopping", priceRange: [0, 50] },
+            { name: "Sheikh Zayed Grand Mosque", emirates: "Abu Dhabi", category: "Cultural", priceRange: [0, 0] },
+            { name: "Louvre Abu Dhabi", emirates: "Abu Dhabi", category: "Museum", priceRange: [60, 150] },
+            { name: "Dubai Marina", emirates: "Dubai", category: "Waterfront", priceRange: [50, 120] },
+            { name: "Palm Jumeirah", emirates: "Dubai", category: "Beach", priceRange: [80, 180] },
+            { name: "Al Fahidi Historic District", emirates: "Dubai", category: "Heritage", priceRange: [20, 60] },
+            { name: "Ferrari World", emirates: "Abu Dhabi", category: "Theme Park", priceRange: [200, 400] },
+            { name: "Sharjah Art Museum", emirates: "Sharjah", category: "Art", priceRange: [30, 80] },
+            { name: "Ajman Beach", emirates: "Ajman", category: "Beach", priceRange: [0, 40] },
+            // Additional attractions for more variety
+            { name: "Dubai Fountain", emirates: "Dubai", category: "Entertainment", priceRange: [0, 30] },
+            { name: "Atlantis Aquaventure", emirates: "Dubai", category: "Water Park", priceRange: [250, 350] },
+            { name: "Ski Dubai", emirates: "Dubai", category: "Adventure", priceRange: [180, 280] },
+            { name: "Yas Island", emirates: "Abu Dhabi", category: "Entertainment", priceRange: [100, 300] },
+            { name: "Dubai Creek", emirates: "Dubai", category: "Heritage", priceRange: [20, 80] },
+            { name: "Miracle Garden", emirates: "Dubai", category: "Nature", priceRange: [40, 60] },
+            { name: "Global Village", emirates: "Dubai", category: "Cultural", priceRange: [15, 25] },
+            { name: "IMG Worlds", emirates: "Dubai", category: "Theme Park", priceRange: [200, 300] }
+          ];
+          
+          // User-specific shuffling using session-based randomization
+          const shuffleArray = (array, seed) => {
+            const shuffled = [...array];
+            let currentIndex = shuffled.length;
+            let randomIndex;
+            
+            // Use seed for consistent but unique shuffling per user
+            let seedValue = seed;
+            const seededRandom = () => {
+              seedValue = (seedValue * 9301 + 49297) % 233280;
+              return seedValue / 233280;
+            };
+            
+            while (currentIndex !== 0) {
+              randomIndex = Math.floor(seededRandom() * currentIndex);
+              currentIndex--;
+              [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
+            }
+            return shuffled;
+          };
+          
+          // Shuffle attractions uniquely for this user session
+          const shuffledTemplates = shuffleArray(attractionTemplates, userSeed);
+          
+          // Filter by emirates preference
+          const selectedEmirates = Array.isArray(data.emirates) ? data.emirates : [data.emirates];
+          const includesAll = selectedEmirates.includes("all");
+          
+          let filteredAttractions = shuffledTemplates;
+          if (!includesAll && selectedEmirates.length > 0) {
+            filteredAttractions = shuffledTemplates.filter(attr => 
+              selectedEmirates.some(emirate => 
+                attr.emirates.toLowerCase().includes(emirate.toLowerCase()) ||
+                emirate.toLowerCase().includes(attr.emirates.toLowerCase())
+              )
+            );
+          }
+          
+          // Generate unique attractions for this user with session-based randomization
+          const randomAttractions = filteredAttractions.map((template, index) => ({
+            attraction: template.name,
+            emirates: template.emirates,
+            category: template.category,
+            price: Math.floor((userSeed + index * 1000) % (template.priceRange[1] - template.priceRange[0] + 1)) + template.priceRange[0],
+            description: `Experience the amazing ${template.name} - a ${template.category.toLowerCase()} attraction in ${template.emirates}`,
+            image_url: `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`,
+            sessionId: sessionId
+          }));
+          
+          console.log(`🎯 Generated ${randomAttractions.length} user-specific attractions (Session: ${sessionId})`);
+          return randomAttractions;
+        };
+
         const { attractions, hotels, transport } = await fetchDatabaseData();
 
         // Add detailed debugging for AI generation issues
@@ -441,17 +525,11 @@ export default function AIGenerate() {
           console.log(`- Budget consideration: ${data.budget}`);
           console.log(`- Traveler type: ${travelerType}`);
 
-          // Check if we have sufficient data and provide fallback
+          // Check if we have sufficient data and provide random generated fallback
           if (attractions.length === 0) {
-            console.warn("⚠️ No attractions found in database! Using fallback data.");
-            // Use fallback attractions if database is empty
-            const fallbackAttractions = [
-              { attraction: "Burj Khalifa", emirates: "Dubai", price: 150, description: "World's tallest building" },
-              { attraction: "Dubai Mall", emirates: "Dubai", price: 0, description: "Largest shopping mall" },
-              { attraction: "Sheikh Zayed Grand Mosque", emirates: "Abu Dhabi", price: 0, description: "Beautiful mosque" },
-              { attraction: "Louvre Abu Dhabi", emirates: "Abu Dhabi", price: 120, description: "Art museum" }
-            ];
-            return fallbackAttractions;
+            console.warn("⚠️ No attractions found in database! Using random filtering system.");
+            const randomAttractions = generateRandomAttractions();
+            return randomAttractions;
           }
 
           // Enhanced AI prompt with better structure and error handling
@@ -631,18 +709,30 @@ CRITICAL RULES:
                 let dayAttractions = day.attractions || [];
                 
                 if (!dayAttractions || dayAttractions.length === 0) {
-                  console.log(`Day ${day.day} has no attractions, adding fallback attractions`);
-                  const fallbackAttractions = attractions.slice(dayIndex, dayIndex + 2).map(attr => ({
+                  console.log(`Day ${day.day} has no attractions, adding random filtered attractions`);
+                  
+                  // User-specific random selection with filtering
+              const availableAttractions = attractions.length > 0 ? attractions : generateRandomAttractions();
+              const userSeed = Date.now() + Math.random() * 1000000;
+              const shuffledAttractions = [...availableAttractions].sort(() => (userSeed % 1000) / 1000 - 0.5);
+              const selectedAttractions = shuffledAttractions.slice(0, Math.min(2, shuffledAttractions.length));
+                  
+                  const randomDurations = ["2 hours", "3 hours", "2-3 hours", "Half day"];
+                  const randomTimings = ["9:00 AM - 12:00 PM", "10:00 AM - 1:00 PM", "2:00 PM - 5:00 PM"];
+                  
+                  const randomAttractions = selectedAttractions.map(attr => ({
                     name: attr.attraction,
-                    duration: "2-3 hours",
-                    type: "sightseeing",
+                    emirates: attr.emirates, // Preserve emirates information
+                    duration: randomDurations[Math.floor(Math.random() * randomDurations.length)],
+                    type: attr.category || "sightseeing",
                     description: `Experience the amazing ${attr.attraction}`,
-                    price: attr.price || 150,
-                    timing: "9:00 AM - 12:00 PM",
+                    price: attr.price || Math.floor(Math.random() * 200) + 50,
+                    timing: randomTimings[Math.floor(Math.random() * randomTimings.length)],
                     personalTip: `Don't miss visiting ${attr.attraction}`,
                     imageUrl: attr.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
                   }));
-                  dayAttractions = fallbackAttractions;
+                  
+                  dayAttractions = randomAttractions;
                 }
                 
                 const enhancedAttractions = dayAttractions.map(attraction => {
@@ -656,6 +746,7 @@ CRITICAL RULES:
                   return {
                     ...attraction,
                     name: dbAttraction?.attraction || attraction.name,
+                    emirates: dbAttraction?.emirates || attraction.emirates, // Preserve emirates data
                     price: dbAttraction?.price || attraction.price || 150,
                     imageUrl: dbAttraction?.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
                   };
@@ -699,8 +790,8 @@ CRITICAL RULES:
           }
         };
 
-        // Fallback package creation with guaranteed attractions
-        const createFallbackPackages = () => {
+        // Random package creation with filtering system
+        const createRandomPackages = () => {
           const totalTravelers = data.adults + (data.kids || 0) + (data.infants || 0);
           const hasChildren = (data.kids || 0) > 0 || (data.infants || 0) > 0;
           const tripDays = parseInt(data.tripDuration) || 3;
@@ -711,7 +802,41 @@ CRITICAL RULES:
           else if (hasChildren) travelerType = "family";
           else if (totalTravelers >= 3) travelerType = "group";
 
-          const packageThemes = {
+          // Random theme generation with filtering
+          const generateRandomThemes = (travelerType) => {
+            const themeCategories = {
+              adventure: ["Explorer", "Adventurer", "Discoverer", "Pioneer", "Wanderer"],
+              cultural: ["Heritage", "Traditional", "Cultural", "Historic", "Authentic"],
+              luxury: ["Premium", "Elite", "Exclusive", "Luxury", "VIP"],
+              family: ["Family Fun", "Kids Adventure", "Family Bond", "Together Time", "Memory Maker"],
+              relaxation: ["Peaceful", "Serene", "Tranquil", "Relaxing", "Calm"]
+            };
+            
+            const activities = ["Journey", "Experience", "Adventure", "Discovery", "Escape", "Getaway", "Tour", "Expedition"];
+            const destinations = ["UAE", "Emirates", "Arabian", "Desert", "Coastal", "Urban"];
+            
+            const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            
+            const themes = Object.keys(themeCategories).map(category => {
+              const categoryWords = themeCategories[category];
+              const randomWord = getRandomElement(categoryWords);
+              const randomActivity = getRandomElement(activities);
+              const randomDestination = getRandomElement(destinations);
+              
+              return {
+                title: `${randomWord} ${randomDestination} ${randomActivity}`,
+                theme: category,
+                description: `${category === 'family' ? 'Perfect for families' : category === 'solo' ? 'Ideal for solo travelers' : 'Great for groups'} seeking ${category} experiences in the UAE`
+              };
+            });
+            
+            // Shuffle and return 3 random themes
+            return themes.sort(() => Math.random() - 0.5).slice(0, 3);
+          };
+          
+          const packageThemes = generateRandomThemes(travelerType);
+          
+          const legacyThemes = {
             solo: [
               { title: "Solo Adventure Explorer", theme: "adventure", description: "Thrilling solo experiences across UAE's most exciting destinations" },
               { title: "Cultural Discovery Journey", theme: "cultural", description: "Deep dive into UAE's rich heritage and traditional culture" },
@@ -871,18 +996,44 @@ CRITICAL RULES:
                 }
               }
 
-              // Ensure at least one attraction per day
-              if (dayAttractions.length === 0 && attractions.length > 0) {
-                const fallbackAttraction = attractions[dayIndex % attractions.length];
+              // Random attraction selection with filtering
+              if (dayAttractions.length === 0) {
+                const availableAttractions = attractions.length > 0 ? attractions : generateRandomAttractions();
+                
+                // Random filtering based on day and preferences
+                const filteredByBudget = availableAttractions.filter(attr => {
+                  const price = attr.price || 150;
+                  const budgetLimit = data.budget === 'budget' ? 100 : data.budget === 'mid-range' ? 300 : 1000;
+                  return price <= budgetLimit;
+                });
+                
+                const attractionsPool = filteredByBudget.length > 0 ? filteredByBudget : availableAttractions;
+                // Use user-specific seed for consistent but unique selection
+                const userSeed = Date.now() + dayIndex * 1000 + Math.random() * 10000;
+                const randomIndex = Math.floor((userSeed % attractionsPool.length));
+                const randomAttraction = attractionsPool[randomIndex];
+                
+                // Generate random timing
+                const timings = [
+                  "9:00 AM - 12:00 PM",
+                  "10:00 AM - 1:00 PM", 
+                  "2:00 PM - 5:00 PM",
+                  "3:00 PM - 6:00 PM",
+                  "6:00 PM - 9:00 PM"
+                ];
+                
+                const durations = ["2 hours", "3 hours", "4 hours", "Half day", "Full day"];
+                
                 dayAttractions.push({
-                  name: fallbackAttraction.attraction,
-                  duration: "3 hours",
-                  type: "sightseeing",
-                  description: generateAttractionDescription(fallbackAttraction.attraction, dayIndex),
-                  price: fallbackAttraction.price || 150,
-                  timing: "9:00 AM - 12:00 PM",
-                  personalTip: generatePersonalTip(fallbackAttraction.attraction, dayIndex),
-                  imageUrl: fallbackAttraction.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
+                  name: randomAttraction.attraction,
+                  emirates: randomAttraction.emirates, // Include emirates information
+                  duration: durations[Math.floor(Math.random() * durations.length)],
+                  type: randomAttraction.category || "sightseeing",
+                  description: generateAttractionDescription(randomAttraction.attraction, dayIndex),
+                  price: randomAttraction.price || Math.floor(Math.random() * 200) + 50,
+                  timing: timings[Math.floor(Math.random() * timings.length)],
+                  personalTip: generatePersonalTip(randomAttraction.attraction, dayIndex),
+                  imageUrl: randomAttraction.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
                 });
               }
 
@@ -915,7 +1066,7 @@ CRITICAL RULES:
               day.budgetBreakdown.transport + day.budgetBreakdown.accommodation, 0);
 
             return {
-              id: `fallback_package_${pkgIndex + 1}`,
+              id: `random_package_${pkgIndex + 1}`,
               title: theme.title,
               description: theme.description,
               personalNote: `This ${theme.theme} package is perfect for ${travelerType} travelers seeking memorable experiences in the UAE`,
@@ -947,27 +1098,27 @@ CRITICAL RULES:
           console.log("- Stack:", error.stack?.substring(0, 500));
           
           usingAI = false;
-          generatedPackages = createFallbackPackages();
-          console.log("🔄 FALLBACK GENERATION SUCCESSFUL! Generated", generatedPackages?.length || 0, "packages");
-          console.log("📝 Using fallback data-driven packages");
+          generatedPackages = createRandomPackages();
+          console.log("🔄 RANDOM GENERATION SUCCESSFUL! Generated", generatedPackages?.length || 0, "packages");
+          console.log("📝 Using random filtering system packages");
         }
         
         // Ensure we always have packages with attractions
         if (!generatedPackages || generatedPackages.length === 0) {
-          console.log("⚠️ NO PACKAGES GENERATED, creating emergency fallback packages");
+          console.log("⚠️ NO PACKAGES GENERATED, creating emergency random packages");
           usingAI = false;
-          generatedPackages = createFallbackPackages();
-          console.log("🆘 Using emergency fallback packages");
+          generatedPackages = createRandomPackages();
+          console.log("🆘 Using emergency random filtering packages");
         }
         
         // Add generation method info to packages for UI display
         generatedPackages = generatedPackages.map(pkg => ({
           ...pkg,
-          generationMethod: usingAI ? "AI" : "Fallback",
+          generationMethod: usingAI ? "AI" : "Random",
           isAIGenerated: usingAI
         }));
         
-        console.log(`🎉 FINAL RESULT: Using ${usingAI ? 'AI-GENERATED' : 'FALLBACK'} packages`);
+        console.log(`🎉 FINAL RESULT: Using ${usingAI ? 'AI-GENERATED' : 'RANDOM FILTERING'} packages`);
         console.log("📊 Package details:", generatedPackages.map(p => ({
           title: p.title,
           method: p.generationMethod,
@@ -1073,21 +1224,27 @@ CRITICAL RULES:
             if (!day.attractions || day.attractions.length === 0) {
               console.warn(`Day ${day.day} has no attractions, adding from database`);
               
-              // Use database attractions for fallback
-              let fallbackAttraction;
-              if (attractions && attractions.length > 0) {
-                fallbackAttraction = attractions[dayIndex % attractions.length];
-              }
+              // Use random filtering for attraction selection
+              const availableAttractions = attractions && attractions.length > 0 ? attractions : generateRandomAttractions();
+              
+              // Apply random filtering
+              const randomIndex = Math.floor(Math.random() * availableAttractions.length);
+              const selectedAttraction = availableAttractions[randomIndex];
+              
+              // Generate random properties
+              const randomDurations = ["2 hours", "3 hours", "4 hours", "Half day"];
+              const randomTimings = ["9:00 AM - 12:00 PM", "2:00 PM - 5:00 PM", "10:00 AM - 1:00 PM"];
               
               day.attractions = [{
-                name: fallbackAttraction?.attraction || "Dubai Experience",
-                duration: "3 hours",
-                type: fallbackAttraction?.category || "sightseeing",
-                description: fallbackAttraction?.description?.substring(0, 100) || `Explore ${fallbackAttraction?.attraction || "Dubai"}`,
-                price: fallbackAttraction?.price || 150,
-                timing: "9:00 AM - 12:00 PM",
-                personalTip: fallbackAttraction?.personal_tip || "Early visit recommended",
-                imageUrl: fallbackAttraction?.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
+                name: selectedAttraction?.attraction || "Dubai Experience",
+                emirates: selectedAttraction?.emirates || "Dubai", // Include emirates for proper detection
+                duration: randomDurations[Math.floor(Math.random() * randomDurations.length)],
+                type: selectedAttraction?.category || "sightseeing",
+                description: selectedAttraction?.description?.substring(0, 100) || `Explore ${selectedAttraction?.attraction || "Dubai"}`,
+                price: selectedAttraction?.price || Math.floor(Math.random() * 200) + 50,
+                timing: randomTimings[Math.floor(Math.random() * randomTimings.length)],
+                personalTip: selectedAttraction?.personal_tip || "Early visit recommended",
+                imageUrl: selectedAttraction?.image_url || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=250&fit=crop&crop=center`
               }];
             }
             

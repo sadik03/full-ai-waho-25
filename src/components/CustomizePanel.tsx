@@ -750,8 +750,8 @@ export function CustomizePanel({ isOpen, onClose, selectedDay, onUpdate }: Custo
                                           {attractionDuration}
                                         </Badge>
                                         {attraction.Emirates && (
-                                          <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700">
-                                            {attraction.Emirates}
+                                          <Badge className="bg-[#AD803B]/10 text-[#AD803B] border-[#AD803B]/30 text-xs">
+                                            📍 {attraction.Emirates}
                                           </Badge>
                                         )}
                                       </div>
