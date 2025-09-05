@@ -17,7 +17,10 @@ const ImageContainer: React.FC<ImageContainerProps> = ({ className = "" }) => {
         <img 
           src="/men-bag.png" 
           alt="Travel Bag" 
-          className="w-full max-w-lg h-[1090px] object-cover transition-all duration-500 hover:scale-105"
+          className="w-full max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] 
+                     h-auto min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[450px] 
+                     max-h-[50vh] object-cover object-center 
+                     transition-all duration-500 hover:scale-105"
         />
       </motion.div>
     </div>

@@ -457,29 +457,28 @@ export function TravelForm() {
           <div className="fixed inset-0 bg-white/75 min-h-screen w-full" ></div>
           <div className="relative min-h-screen flex flex-col">
             {/* Progress Bar */}
-            <div className="flex-shrink-0 py-0">
+            <div className="flex-shrink-0">
               <ProgressBar currentStep={1} />
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex items-center justify-center px-2 sm:px-4 md:px-6 lg:px-80 py-2 sm:py-4">
+            <div className="flex-1 flex items-start justify-center px-2 sm:px-4 md:px-6 lg:px-20 py-1 sm:py-2">
               <motion.div 
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="w-full max-w-[1200px] mx-auto lg:ml-[-210px]"
+                className="w-full max-w-[1400px] mx-auto"
               >
                 {/* Header */}
-                <div className="text-center mb-4 sm:mb-6">
+                <div className="text-center mb-2 sm:mb-3">
                   <div className="px-2 sm:px-6">
                     <h1 
-                      className="text-[#1A252F] text-[24px] sm:text-[30px] lg:text-[40px] leading-[1.1] mb-2"
+                      className="text-[#1A252F] text-[20px] sm:text-[24px] lg:text-[28px] leading-[1.1] mb-1"
                       style={{ fontFamily: 'Delius, sans-serif', fontWeight: 'bold', letterSpacing: '-0.04em' }}
                     >
-  
                       Design Your UAE Adventure, Your Way
                     </h1>
-                    <h5 className="text-[#2C3E50] text-[16px] sm:text-[18px] lg:text-[20px] font-medium font-Nunito leading-tight max-w-2xl mx-auto">
+                    <h5 className="text-[#2C3E50] text-[14px] sm:text-[16px] lg:text-[18px] font-medium font-Nunito leading-tight max-w-2xl mx-auto">
                       Embark on an extraordinary journey through the jewels of the Arabian Peninsula
                     </h5>
                   </div>
@@ -489,11 +488,11 @@ export function TravelForm() {
                 <Card className="border-2 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)'}}>
                   <CardContent className="p-0">
                     <div>
-                      <div className="grid grid-cols-1 lg:grid-cols-5 min-h-[400px] sm:min-h-[450px]">
+                      <div className="grid grid-cols-1 lg:grid-cols-7 min-h-[350px] sm:min-h-[400px]">
                         
                         {/* Left Side - Masked Image Preview */}
-                        <div className="lg:col-span-2 relative order-2 lg:order-1 hidden lg:block">
-                          <div className="relative h-full min-h-[450px] overflow-hidden ">
+                        <div className="lg:col-span-3 relative order-2 lg:order-1 hidden lg:block">
+                          <div className="relative h-full min-h-[400px] overflow-hidden ">
                             {/* Image */}
                             <img 
                               src={previewImageUrl} 
@@ -543,8 +542,8 @@ export function TravelForm() {
                           </div>
                         </div>
 
-                        {/* Right Side - Form with Inline Inputs */}
-                        <div className="lg:col-span-3 p-3 sm:p-4 lg:p-6 relative order-1 lg:order-2">
+                        {/* Middle - Form with Inline Inputs */}
+                        <div className="lg:col-span-3 p-2 sm:p-3 lg:p-4 relative order-1 lg:order-2">
                           {/* Subtle Background Shape */}
                           <div className="absolute inset-0 pointer-events-none overflow-hidden">
                             <div 
@@ -570,19 +569,19 @@ export function TravelForm() {
                     <div className="h-full flex flex-col relative z-10">
                       
                       {/* Form Header */}
-                      <div className="mb-4">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-2 h-8 rounded-full" style={{ backgroundColor: '#2C3E50' }}></div>
-                          <h2 className="text-xl font-bold text-[#1A252F]">Travel Details</h2>
+                      <div className="mb-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: '#2C3E50' }}></div>
+                          <h2 className="text-lg font-bold text-[#1A252F]">Travel Details</h2>
                         </div>
-                        <p className="text-[#2C3E50] text-sm">Complete your luxury travel preferences</p>
+                        <p className="text-black text-sm">Complete your luxury travel preferences</p>
                       </div>
 
                       {/* Form Grid with Outlined Inputs */}
-                      <div className="flex-1 space-y-3">
+                      <div className="flex-1 space-y-2">
                         
                         {/* Personal Information - Compact Layout */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {/* Full Name */}
                           <div className="space-y-2">
                             <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
@@ -591,7 +590,7 @@ export function TravelForm() {
                             <Input 
                               {...register("fullName")} 
                               placeholder="Your full name"
-                              className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
+                              className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
                               style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}
                             />
                             {errors.fullName && <p className="text-amber-600 text-xs">{errors.fullName.message}</p>}
@@ -670,7 +669,7 @@ export function TravelForm() {
                               {/* Phone Input */}
                               <Input 
                                 placeholder="50 123 4567"
-                                className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 pl-16 sm:pl-20 pr-0"
+                                className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 pl-16 sm:pl-20 pr-0"
                                 style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}
                                 type="tel"
                                 value={watch("phone")?.replace(/^\+\d+\s*/, "") || ""}
@@ -707,15 +706,15 @@ export function TravelForm() {
                               {...register("email")} 
                               type="email"
                               placeholder="your@email.com"
-                              className="h-10 bg-transparent border-0 border-b-2 text-black placeholder:text-gray-400 rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
-                              style={{ borderBottomColor: '#AD803B', boxShadow: 'none' }}
+                              className="h-8 bg-transparent border-0 border-b-2 text-black placeholder:text-gray-400 rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
+                              style={{ borderBottomColor: 'rgb(44, 62, 80)', boxShadow: 'none' }}
                             />
                             {errors.email && <p className="text-amber-600 text-xs">{errors.email.message}</p>}
                           </div>
                         </div>
 
                         {/* Trip Details - Compact Layout */}
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
                           {/* Duration */}
                           <div className="space-y-2">
                             <Label className="text-[#1A252F] text-xs font-semibold">Duration (Nights)</Label>
@@ -727,11 +726,11 @@ export function TravelForm() {
                                   const newValue = Math.max(1, current - 1);
                                   setValue("tripDuration", newValue.toString());
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 -
                               </button>
-                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.tripDuration || "5"}
                               </div>
                               <button
@@ -741,7 +740,7 @@ export function TravelForm() {
                                   const newValue = Math.min(30, current + 1);
                                   setValue("tripDuration", newValue.toString());
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 +
                               </button>
@@ -753,7 +752,7 @@ export function TravelForm() {
                           <div className="space-y-2">
                             <Label className="text-[#1A252F] text-xs font-semibold">Travel Month</Label>
                             <Select value={watch("journeyMonth")} onValueChange={(v) => setValue("journeyMonth", v)}>
-                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] rounded-none px-0 focus:outline-none focus:border-b-2" style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}>
+                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] rounded-none px-0 focus:outline-none focus:border-b-2" style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}>
                                 <SelectValue placeholder="Select month" />
                               </SelectTrigger>
                               <SelectContent className="bg-white border-2 rounded-xl shadow-lg" style={{ borderColor: '#2C3E50' }}>
@@ -782,7 +781,7 @@ export function TravelForm() {
                                 if (open) setIsPhoneCountryDropdownOpen(false);
                               }}
                             >
-                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300" style={{ borderBottomColor: '#AD803B', boxShadow: 'none' }}>
+                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300" style={{ borderBottomColor: 'rgb(44, 62, 80)', boxShadow: 'none' }}>
                                 <SelectValue placeholder="Select country" />
                               </SelectTrigger>
                               <SelectContent className="bg-white border-2 rounded-xl max-h-60 overflow-y-auto p-0" style={{ borderColor: '#0d1b2a' }}>
@@ -879,12 +878,12 @@ export function TravelForm() {
                         </div>
 
                         {/* Budget & Group Information - Compact Layout */}
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
                           {/* Budget */}
                           <div className="space-y-2">
                             <Label className="text-black text-xs font-semibold">Budget (AED)</Label>
                             <Select value={watch("budget")} onValueChange={(v) => setValue("budget", v)}>
-                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:border-blue-600" style={{ borderBottomColor: '#2563eb' }}>
+                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:border-blue-600" style={{ borderBottomColor: 'rgb(44, 62, 80)' }}>
                                 <SelectValue placeholder="Select range" />
                               </SelectTrigger>
                               <SelectContent className="bg-white border-2 rounded-xl" style={{ borderColor: '#2563eb' }}>
@@ -909,11 +908,11 @@ export function TravelForm() {
                                   const newValue = Math.max(1, current - 1);
                                   setValue("adults", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 -
                               </button>
-                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.adults || 1}
                               </div>
                               <button
@@ -923,7 +922,7 @@ export function TravelForm() {
                                   const newValue = Math.min(8, current + 1);
                                   setValue("adults", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 +
                               </button>
@@ -942,11 +941,11 @@ export function TravelForm() {
                                   const newValue = Math.max(0, current - 1);
                                   setValue("kids", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 -
                               </button>
-                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.kids || 0}
                               </div>
                               <button
@@ -956,7 +955,7 @@ export function TravelForm() {
                                   const newValue = Math.min(6, current + 1);
                                   setValue("kids", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 +
                               </button>
@@ -975,11 +974,11 @@ export function TravelForm() {
                                   const newValue = Math.max(0, current - 1);
                                   setValue("infants", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 -
                               </button>
-                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.infants || 0}
                               </div>
                               <button
@@ -989,7 +988,7 @@ export function TravelForm() {
                                   const newValue = Math.min(4, current + 1);
                                   setValue("infants", newValue);
                                 }}
-                                className="w-8 h-8 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
+                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
                               >
                                 +
                               </button>
@@ -999,7 +998,7 @@ export function TravelForm() {
                         </div>
 
                         {/* Submit Buttons */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-2">
                           <HoverRadiusButton
                             text={
                               <div className="flex items-center justify-center sm:justify-start">
@@ -1012,7 +1011,7 @@ export function TravelForm() {
                             }
                             onClick={handleAISubmit}
                             type="submit"
-                            className="h-12 sm:h-14"
+                            className="h-10 sm:h-12"
                           />
 
                           <HoverRadiusButton
@@ -1027,22 +1026,22 @@ export function TravelForm() {
                             }
                             onClick={handleManualSubmit}
                             type="button"
-                            className="h-12 sm:h-14"
+                            className="h-10 sm:h-12"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
+
+                        {/* Right Side - Image Container */}
+                        <div className="lg:col-span-1 relative order-3 lg:order-3 hidden lg:flex items-center justify-center p-2">
+                          <ImageContainer className="w-full max-w-[180px]" />
+                        </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
-        
-        {/* Image Container */}
-        <div className="fixed top-1/2 right-8 transform -translate-y-1/2 z-10 hidden lg:block mt-[189px]">
-          <ImageContainer className="w-99" />
-        </div>
       </div>
     </div>
   </motion.div>

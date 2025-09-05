@@ -82,13 +82,13 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
         <div className="absolute inset-0 bg-black/50"></div>
       </div> */}
       
-      {/* Progress Bar Content */}
-      <div className={`relative z-10 w-full h-[200px] flex items-center justify-center transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      {/* Progress Bar Content - Responsive height and padding */}
+      <div className={`relative z-10 w-full h-[100px] sm:h-[120px] md:h-[140px] flex items-center justify-center transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3">
           
 
-          {/* Steps Container */}
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
+          {/* Steps Container - Responsive spacing */}
+          <div className="flex items-center justify-between gap-1 sm:gap-2 md:gap-4">
             {steps.map((step, index) => {
               const isDone = step.id < currentStep;
               const isActive = step.id === currentStep;
@@ -107,9 +107,9 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                       ease: "easeOut" 
                     }}
                   >
-                    {/* Icon Container */}
+                    {/* Icon Container - Responsive sizing */}
                     <motion.div
-                      className={`relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center rounded-2xl transition-all duration-500 border-2 ${
+                      className={`relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all duration-500 border-2 ${
                         isDone
                           ? `bg-[#2C3D4F]/20 border-[#2C3D4F]/40 text-[#2C3D4F] shadow-xl`
                           : isActive
@@ -134,18 +134,19 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                             stiffness: 200
                           }}
                         >
-                          <Check className="w-6 h-6 sm:w-7 sm:h-7 text-[#2C3D4F]" />
+                          <Check className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#2C3D4F]" />
                         </motion.div>
                       ) : (
-                        <StepIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#2C3D4F]" />
+                        <StepIcon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#2C3D4F]" />
                       )}
 
                       {/* Active Step Animations */}
                       {isActive && (
                         <>
-                          {/* Rotating Ring */}
+                          {/* Rotating Ring - Responsive border radius */}
                           <motion.div
-                            className="absolute inset-0 rounded-2xl border-2 border-[#2C3D4F]/60"
+                            className="absolute inset-0 rounded-xl sm:rounded-2xl border-2"
+                            style={{ borderColor: 'rgba(44, 62, 80, 0.6)' }}
                             animate={{ rotate: 360 }}
                             transition={{ 
                               duration: 8, 
@@ -154,9 +155,9 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                             }}
                           />
                           
-                          {/* Pulsing Glow */}
+                          {/* Pulsing Glow - Responsive border radius */}
                           <motion.div
-                            className="absolute inset-0 rounded-2xl bg-[#2C3D4F]/20"
+                            className="absolute inset-0 rounded-xl sm:rounded-2xl bg-[#2C3D4F]/20"
                             animate={{ 
                               scale: [1, 1.2, 1],
                               opacity: [0.5, 0.8, 0.5] 
@@ -170,9 +171,9 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                         </>
                       )}
 
-                      {/* Step Status Indicator */}
+                      {/* Step Status Indicator - Responsive sizing */}
                       <motion.div
-                        className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs font-bold ${
                           isDone
                             ? "bg-[#2C3D4F] text-white shadow-lg"
                             : isActive
@@ -183,13 +184,13 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}
                       >
-                        {isDone ? "✓" : step.id}
+                        <span className="text-xs sm:text-xs">{isDone ? "✓" : step.id}</span>
                       </motion.div>
                     </motion.div>
 
-                    {/* Step Title */}
+                    {/* Step Title - Better responsive text sizing */}
                     <motion.h4
-                      className={`mt-3 text-xs sm:text-sm font-semibold transition-all duration-300 ${
+                      className={`mt-1 sm:mt-2 text-xs sm:text-sm md:text-base font-semibold transition-all duration-300 text-center leading-tight ${
                         step.id <= currentStep 
                           ? "text-[#2C3D4F]" 
                           : "text-[#2C3D4F]/60"
@@ -201,13 +202,14 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
                     >
-                      {step.title}
+                      <span className="block sm:hidden">{step.title.split(' ')[0]}</span>
+                      <span className="hidden sm:block">{step.title}</span>
                     </motion.h4>
 
-                    {/* Step Description */}
+                    {/* Step Description - Better responsive visibility */}
                     <motion.p 
-                      className={`hidden sm:block text-xs mt-1 transition-all duration-300 text-center max-w-[120px] ${
-                        step.id <= currentStep ? "text-[#2C3D4F]/70" : "text-[#2C3D4F]/40"
+                      className={`hidden lg:block text-xs mt-1 transition-all duration-300 text-center max-w-[100px] lg:max-w-[120px] ${
+                        step.id <= currentStep ? "text-black" : "text-black/60"
                       }`}
                       style={{ 
                         fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',
@@ -222,9 +224,9 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                     </motion.p>
                   </motion.div>
 
-                  {/* Travel Route Connector */}
+                  {/* Travel Route Connector - Responsive spacing */}
                   {index < steps.length - 1 && (
-                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4">
+                    <div className="flex-1 flex items-center justify-center px-1 sm:px-2 md:px-4">
                       <div className="relative w-full h-1">
                         {/* Route Path */}
                         <div className="h-1 w-full bg-[#2C3D4F]/20 rounded-full overflow-hidden backdrop-blur-sm">
@@ -242,10 +244,10 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                               ease: "easeInOut" 
                             }}
                           >
-                            {/* Moving Travel Dot */}
+                            {/* Moving Travel Dot - Responsive sizing */}
                             {isDone && (
                               <motion.div
-                                className="absolute top-1/2 right-0 w-3 h-3 bg-[#2C3D4F] rounded-full transform -translate-y-1/2 shadow-lg"
+                                className="absolute top-1/2 right-0 w-2 h-2 sm:w-3 sm:h-3 bg-[#2C3D4F] rounded-full transform -translate-y-1/2 shadow-lg"
                                 initial={{ x: -100, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{ 
@@ -258,9 +260,9 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
                           </motion.div>
                         </div>
                         
-                        {/* Route Landmarks */}
+                        {/* Route Landmarks - Responsive sizing */}
                         <motion.div
-                          className="absolute top-1/2 left-1/2 w-2 h-2 bg-[#2C3D4F]/60 rounded-full transform -translate-x-1/2 -translate-y-1/2"
+                          className="absolute top-1/2 left-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#2C3D4F]/60 rounded-full transform -translate-x-1/2 -translate-y-1/2"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 1 + index * 0.1, duration: 0.3 }}
