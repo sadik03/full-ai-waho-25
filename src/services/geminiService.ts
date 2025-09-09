@@ -38,7 +38,7 @@ export const generateContent = async (request: GeminiRequest): Promise<GeminiRes
   
   // Check prompt length (rough token estimation: 1 token ≈ 4 characters)
   const estimatedTokens = Math.ceil(request.prompt.length / 4);
-  const maxInputTokens = 30000; // Conservative limit for Gemini 2.0 Flash
+  const maxInputTokens = 8000000; // Gemini 2.5 Pro supports up to 8M input tokens
   
   if (estimatedTokens > maxInputTokens) {
     console.warn(`⚠️ Prompt may be too long: ${estimatedTokens} estimated tokens`);
@@ -205,7 +205,19 @@ export const validateJSONResponse = (content: string): boolean => {
 
 // Helper function to estimate token count
 export const estimateTokenCount = (text: string): number => {
-  // More accurate token estimation for Gemini
+  // More accurate token estimation for Gemini 2.5 Pro
   // Average: 1 token ≈ 3.5-4 characters for English text
   return Math.ceil(text.length / 3.5);
+};
+
+// Helper function to estimate cost for Gemini 2.5 Pro
+export const estimateCost = (inputTokens: number, outputTokens: number): number => {
+  // Gemini 2.5 Pro pricing (approximate)
+  const inputCostPer1K = 0.00125; // $1.25 per 1K input tokens
+  const outputCostPer1K = 0.005;   // $5.00 per 1K output tokens
+  
+  const inputCost = (inputTokens / 1000) * inputCostPer1K;
+  const outputCost = (outputTokens / 1000) * outputCostPer1K;
+  
+  return inputCost + outputCost;
 };

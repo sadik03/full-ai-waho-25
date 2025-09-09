@@ -21,6 +21,7 @@ import ImageContainer from "./ImageContainer";
 import { TravelSubmissionService } from "@/services/supabaseService";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import "../styles/fonts.css"; // Import the fonts
 
 // Custom Hover Radius Button Component from Landing page
 function HoverRadiusButton({ text, onClick, className = "", type = "button" }: {
@@ -200,7 +201,7 @@ export function TravelForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedCountryCode, setSelectedCountryCode] = useState("+971"); // Default to UAE
-  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneInput, setPhoneInput] = useState(" ");
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
   const [isDepartureCountryDropdownOpen, setIsDepartureCountryDropdownOpen] = useState(false); // for Departing Country
   const [isPhoneCountryDropdownOpen, setIsPhoneCountryDropdownOpen] = useState(false); // for phone country code
@@ -218,7 +219,7 @@ export function TravelForm() {
     resolver: zodResolver(travelFormSchema),
     defaultValues: {
       fullName: "",
-      phone: "+971",
+      phone: "+971 ",
       email: "",
       tripDuration: "5",
       journeyMonth: "january",
@@ -246,48 +247,26 @@ export function TravelForm() {
 
   // Handle emirates selection logic
   const handleEmirateChange = (emirateId: string, checked: boolean) => {
+    let newSelection: string[] = [...selectedEmirates];
+  
     if (emirateId === "all") {
       if (checked) {
-        // When "All Emirates" is checked, select all individual emirates
-        const allEmirateIds = emiratesList.map(e => e.id);
-        setSelectedEmirates(allEmirateIds);
-        setIsAllEmiratesSelected(true);
-        setValue("emirates", allEmirateIds);
+        newSelection = emiratesList.map(e => e.id);
       } else {
-        // When "All Emirates" is unchecked, uncheck all emirates
-        setSelectedEmirates([]);
-        setIsAllEmiratesSelected(false);
-        setValue("emirates", []);
+        newSelection = [];
       }
     } else {
-      let newSelection: string[];
       if (checked) {
-        // Add individual emirate
-        newSelection = [...selectedEmirates.filter(id => id !== "all"), emirateId];
-        
-        // Check if all individual emirates are now selected
-        if (newSelection.length === emiratesList.length) {
-          setIsAllEmiratesSelected(true);
-        } else {
-          setIsAllEmiratesSelected(false);
-        }
+        newSelection.push(emirateId);
       } else {
-        // Remove individual emirate
-        newSelection = selectedEmirates.filter(id => id !== emirateId && id !== "all");
-        setIsAllEmiratesSelected(false);
-      }
-      
-      // If no emirates selected, fall back to empty selection
-      if (newSelection.length === 0) {
-        setSelectedEmirates([]);
-        setIsAllEmiratesSelected(false);
-        setValue("emirates", []);
-      } else {
-        setSelectedEmirates(newSelection);
-        setValue("emirates", newSelection);
+        newSelection = newSelection.filter(id => id !== emirateId);
       }
     }
+    
+    setSelectedEmirates(newSelection);
+    setIsAllEmiratesSelected(newSelection.length === emiratesList.length);
   };
+  
 
   // Update form value when emirates selection changes
   useEffect(() => {
@@ -347,46 +326,72 @@ export function TravelForm() {
   const handleAISubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('🚀 AI Submit button clicked');
+    console.log('Current form values:', watchedValues);
     
-    // Validate form first
-    handleSubmit(
-      (data) => {
-        console.log('✅ Form validation passed:', data);
-        onSubmit(data, "/ai-generate");
-      },
-      (errors) => {
-        console.log('⚠️ Form validation failed:', errors);
-        toast({
-          title: "Please complete all required fields",
-          description: "Check the highlighted fields and try again.",
-          variant: "destructive",
-        });
-        // Don't navigate on validation errors
-      }
-    )();
+    // Perform form validation - block navigation if validation fails
+    try {
+      await handleSubmit(
+        (data) => {
+          console.log('✅ Form validation passed:', data);
+          onSubmit(data, "/ai-generate");
+        },
+        (errors) => {
+          console.log('❌ Form validation failed:', errors);
+          toast({
+            title: "Please complete all required fields",
+            description: "Make sure all required fields are filled in correctly before proceeding.",
+            variant: "destructive",
+          });
+          // DO NOT navigate - validation failed
+          return;
+        }
+      )();
+    } catch (error) {
+      console.error('❌ Error in form submission:', error);
+      toast({
+        title: "Validation Error",
+        description: "Please check all required fields and try again.",
+        variant: "destructive",
+      });
+      // DO NOT navigate - validation failed
+      return;
+    }
   };
 
   // Handle Manual Planning submission
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('🚀 Manual Submit button clicked');
+    console.log('Current form values:', watchedValues);
     
-    // Validate form first
-    handleSubmit(
-      (data) => {
-        console.log('✅ Form validation passed:', data);
-        onSubmit(data, "/manual-plan");
-      },
-      (errors) => {
-        console.log('⚠️ Form validation failed:', errors);
-        toast({
-          title: "Please complete all required fields",
-          description: "Check the highlighted fields and try again.",
-          variant: "destructive",
-        });
-        // Don't navigate on validation errors
-      }
-    )();
+    // Perform form validation - block navigation if validation fails
+    try {
+      await handleSubmit(
+        (data) => {
+          console.log('✅ Form validation passed:', data);
+          onSubmit(data, "/manual-plan");
+        },
+        (errors) => {
+          console.log('❌ Form validation failed:', errors);
+          toast({
+            title: "Please complete all required fields",
+            description: "Make sure all required fields are filled in correctly before proceeding.",
+            variant: "destructive",
+          });
+          // DO NOT navigate - validation failed
+          return;
+        }
+      )();
+    } catch (error) {
+      console.error('❌ Error in form submission:', error);
+      toast({
+        title: "Validation Error",
+        description: "Please check all required fields and try again.",
+        variant: "destructive",
+      });
+      // DO NOT navigate - validation failed
+      return;
+    }
   };
 
   const onSubmit = async (data: TravelFormData, path: string) => {
@@ -423,14 +428,14 @@ export function TravelForm() {
           console.error('❌ Error submitting to database (but continuing):', error);
         });
       
-      // Navigate immediately without waiting for database
+      // Navigate only after successful validation
       console.log('🧭 Navigating to:', path);
       navigate(path);
       
     } catch (error) {
       console.error('❌ Error in form submission:', error);
       
-      // Always navigate even if there's an error
+      // Only navigate if there's a non-validation error
       console.log('🧭 Navigating anyway to:', path);
       navigate(path);
     }
@@ -454,45 +459,48 @@ export function TravelForm() {
           }}
         >
           {/* Background Overlay for better readability */}
-          <div className="fixed inset-0 bg-white/75 min-h-screen w-full" ></div>
+          <div className="fixed inset-0 bg-white/85 min-h-screen w-full" ></div>
           <div className="relative min-h-screen flex flex-col">
             {/* Progress Bar */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 py-0">
               <ProgressBar currentStep={1} />
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex items-start justify-center px-2 sm:px-4 md:px-6 lg:px-20 py-1 sm:py-2">
+            <div className="flex-1 flex items-center justify-center px-2 sm:px-4 md:px-6 lg:px-80 py-2 sm:py-4">
               <motion.div 
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="w-full max-w-[1400px] mx-auto"
+                className="w-full max-w-[1200px] mx-auto lg:ml-[-210px]"
               >
                 {/* Header */}
-                <div className="text-center mb-2 sm:mb-3">
+                <div className="text-center mb-4 sm:mb-6">
                   <div className="px-2 sm:px-6">
                     <h1 
-                      className="text-[#1A252F] text-[20px] sm:text-[24px] lg:text-[28px] leading-[1.1] mb-1"
-                      style={{ fontFamily: 'Delius, sans-serif', fontWeight: 'bold', letterSpacing: '-0.04em' }}
+                      className="text-[#1A252F] text-[34px] sm:text-[30px] lg:text-[50px] leading-[1.1] mb-2"
+                      style={{ fontFamily: 'Quentin, sans-serif', fontWeight: 'bold', letterSpacing: '-0.04em' }}
                     >
                       Design Your UAE Adventure, Your Way
                     </h1>
-                    <h5 className="text-[#2C3E50] text-[14px] sm:text-[16px] lg:text-[18px] font-medium font-Nunito leading-tight max-w-2xl mx-auto">
+                    <h5 className="text-[#2C3E50] text-[15px] sm:text-[18px] lg:text-[20px] font-medium  leading-tight max-w-2xl mx-auto"
+                    
+                     style={{ fontFamily: 'HYPE, sans-serif', fontWeight: 'bold', letterSpacing: '-0.04em' }}
+                    >
                       Embark on an extraordinary journey through the jewels of the Arabian Peninsula
                     </h5>
                   </div>
                 </div>
 
                 {/* Main Card */}
-                <Card className="border-2 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)'}}>
+                <Card className="shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)'}}>
                   <CardContent className="p-0">
                     <div>
-                      <div className="grid grid-cols-1 lg:grid-cols-7 min-h-[350px] sm:min-h-[400px]">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 min-h-[400px] sm:min-h-[450px]">
                         
                         {/* Left Side - Masked Image Preview */}
-                        <div className="lg:col-span-3 relative order-2 lg:order-1 hidden lg:block">
-                          <div className="relative h-full min-h-[400px] overflow-hidden ">
+                        <div className="lg:col-span-1 relative order-2 lg:order-1 hidden lg:block">
+                          <div className="relative h-full min-h-[450px] overflow-hidden ">
                             {/* Image */}
                             <img 
                               src={previewImageUrl} 
@@ -542,8 +550,8 @@ export function TravelForm() {
                           </div>
                         </div>
 
-                        {/* Middle - Form with Inline Inputs */}
-                        <div className="lg:col-span-3 p-2 sm:p-3 lg:p-4 relative order-1 lg:order-2">
+                        {/* Right Side - Form with Inline Inputs */}
+                        <div className="lg:col-span-2 p-4 sm:p-4 lg:p-6 relative order-1 lg:order-2">
                           {/* Subtle Background Shape */}
                           <div className="absolute inset-0 pointer-events-none overflow-hidden">
                             <div 
@@ -569,28 +577,28 @@ export function TravelForm() {
                     <div className="h-full flex flex-col relative z-10">
                       
                       {/* Form Header */}
-                      <div className="mb-2">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-1 h-6 rounded-full" style={{ backgroundColor: '#2C3E50' }}></div>
-                          <h2 className="text-lg font-bold text-[#1A252F]">Travel Details</h2>
+                      <div className="mb-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-2 h-8 rounded-full" style={{ backgroundColor: '#2C3E50' }}></div>
+                          <h2 className="text-xl font-bold text-[#1A252F]">Travel Details</h2>
                         </div>
                         <p className="text-black text-sm">Complete your luxury travel preferences</p>
                       </div>
 
                       {/* Form Grid with Outlined Inputs */}
-                      <div className="flex-1 space-y-2">
+                      <div className="flex-1 space-y-3">
                         
                         {/* Personal Information - Compact Layout */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {/* Full Name */}
                           <div className="space-y-2">
                             <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
-                              Full Name <span style={{ color: '#2C3E50' }}>*</span>
+                              Full Name <span style={{ color: '#ef4444' }}>*</span>
                             </Label>
                             <Input 
                               {...register("fullName")} 
                               placeholder="Your full name"
-                              className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
+                              className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
                               style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}
                             />
                             {errors.fullName && <p className="text-amber-600 text-xs">{errors.fullName.message}</p>}
@@ -599,7 +607,7 @@ export function TravelForm() {
                           {/* Phone Number with Country Code */}
                           <div className="space-y-2">
                             <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
-                              Phone Number <span style={{ color: '#2C3E50' }}>*</span>
+                              Phone Number <span style={{ color: '#ef4444' }}>*</span>
                             </Label>
                             <div className="relative">
                               {/* Country Flag Dropdown */}
@@ -669,7 +677,7 @@ export function TravelForm() {
                               {/* Phone Input */}
                               <Input 
                                 placeholder="50 123 4567"
-                                className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 pl-16 sm:pl-20 pr-0"
+                                className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] placeholder:text-[#2C3E50] rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 pl-16 sm:pl-20 pr-0"
                                 style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}
                                 type="tel"
                                 value={watch("phone")?.replace(/^\+\d+\s*/, "") || ""}
@@ -700,24 +708,26 @@ export function TravelForm() {
                           {/* Email */}
                           <div className="space-y-2">
                             <Label className="text-black text-xs font-semibold flex items-center gap-2">
-                              Email Address <span style={{ color: '#AD803B' }}>*</span>
+                              Email Address <span style={{ color: '#ef4444' }}>*</span>
                             </Label>
                             <Input 
                               {...register("email")} 
                               type="email"
                               placeholder="your@email.com"
-                              className="h-8 bg-transparent border-0 border-b-2 text-black placeholder:text-gray-400 rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
-                              style={{ borderBottomColor: 'rgb(44, 62, 80)', boxShadow: 'none' }}
+                              className="h-10 bg-transparent border-0 border-b-2 text-black placeholder:text-gray-400 rounded-none focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300 px-0"
+                              style={{ borderBottomColor: '#1A252F', boxShadow: 'none' }}
                             />
-                            {errors.email && <p className="text-amber-600 text-xs">{errors.email.message}</p>}
+                            {errors.email && <p className="text-black-600 text-xs">{errors.email.message}</p>}
                           </div>
                         </div>
 
                         {/* Trip Details - Compact Layout */}
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                           {/* Duration */}
                           <div className="space-y-2">
-                            <Label className="text-[#1A252F] text-xs font-semibold">Duration (Nights)</Label>
+                            <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
+                              Duration (Per Nights) <span style={{ color: '#ef4444' }}>*</span>
+                            </Label>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -726,11 +736,11 @@ export function TravelForm() {
                                   const newValue = Math.max(1, current - 1);
                                   setValue("tripDuration", newValue.toString());
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7  bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 -
                               </button>
-                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.tripDuration || "5"}
                               </div>
                               <button
@@ -740,7 +750,7 @@ export function TravelForm() {
                                   const newValue = Math.min(30, current + 1);
                                   setValue("tripDuration", newValue.toString());
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7  bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 +
                               </button>
@@ -750,9 +760,11 @@ export function TravelForm() {
 
                           {/* Travel Month */}
                           <div className="space-y-2">
-                            <Label className="text-[#1A252F] text-xs font-semibold">Travel Month</Label>
-                            <Select value={watch("journeyMonth")} onValueChange={(v) => setValue("journeyMonth", v)}>
-                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-[#1A252F] rounded-none px-0 focus:outline-none focus:border-b-2" style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}>
+                            <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
+                              Travel Month <span style={{ color: '#ef4444' }}>*</span>
+                            </Label>
+                            <Select onValueChange={(v) => setValue("journeyMonth", v)}>
+                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-[#1A252F] rounded-none px-0 focus:outline-none focus:border-b-2" style={{ borderBottomColor: '#2C3E50', boxShadow: 'none' }}>
                                 <SelectValue placeholder="Select month" />
                               </SelectTrigger>
                               <SelectContent className="bg-white border-2 rounded-xl shadow-lg" style={{ borderColor: '#2C3E50' }}>
@@ -768,7 +780,9 @@ export function TravelForm() {
 
                           {/* Departure */}
                           <div className="space-y-2">
-                            <Label className="text-black text-xs font-semibold">Departing Country</Label>
+                            <Label className="text-black text-xs font-semibold flex items-center gap-2">
+                              Departing Country <span style={{ color: '#ef4444' }}>*</span>
+                            </Label>
                             <Select
                               value={watch("departureCountry")}
                               onValueChange={(v) => {
@@ -781,10 +795,10 @@ export function TravelForm() {
                                 if (open) setIsPhoneCountryDropdownOpen(false);
                               }}
                             >
-                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300" style={{ borderBottomColor: 'rgb(44, 62, 80)', boxShadow: 'none' }}>
+                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:ring-0 focus:outline-none focus:border-b-2 transition-all duration-300" style={{ borderBottomColor: '#1A252F', boxShadow: 'none' }}>
                                 <SelectValue placeholder="Select country" />
                               </SelectTrigger>
-                              <SelectContent className="bg-white border-2 rounded-xl max-h-60 overflow-y-auto p-0" style={{ borderColor: '#0d1b2a' }}>
+                              <SelectContent className="bg-white border-2 rounded-xl max-h-60 overflow-y-auto p-0" style={{ borderColor: '#1A252F' }}>
                                 {/* Single container: search and scroll together */}
                                 <div className="sticky top-0 bg-white z-10 p-2 border-b border-gray-100">
                                   <Input
@@ -798,7 +812,7 @@ export function TravelForm() {
                                 <div className="max-h-48 overflow-y-auto">
                                   {filteredCountries.length > 0 ? (
                                     filteredCountries.map((country) => (
-                                      <SelectItem key={country.code} value={country.name} className="text-black hover:bg-[#0d1b2a] focus:bg-[#0d1b2a] data-[state=checked]:bg-[#0d1b2a] data-[state=checked]:text-white">
+                                      <SelectItem key={country.code} value={country.name} className="text-black hover:bg-[#0d1b2a] focus:bg-[#0d1b2a] data-[state=checked]:bg-[#1A252F] data-[state=checked]:text-white">
                                         <span className="mr-2">{country.flag}</span>{country.name}
                                       </SelectItem>
                                     ))
@@ -813,7 +827,9 @@ export function TravelForm() {
 
                           {/* Emirates */}
                           <div className="space-y-2">
-                            <Label className="text-black text-xs font-semibold">Destinations</Label>
+                            <Label className="text-black text-xs font-semibold flex items-center gap-2">
+                              Destinations <span style={{ color: '#ef4444' }}>*</span>
+                            </Label>
                             <Select 
                               open={isEmiratesDropdownOpen}
                               onOpenChange={setIsEmiratesDropdownOpen}
@@ -878,12 +894,12 @@ export function TravelForm() {
                         </div>
 
                         {/* Budget & Group Information - Compact Layout */}
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                           {/* Budget */}
                           <div className="space-y-2">
-                            <Label className="text-black text-xs font-semibold">Budget (AED)</Label>
-                            <Select value={watch("budget")} onValueChange={(v) => setValue("budget", v)}>
-                              <SelectTrigger className="h-8 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:border-blue-600" style={{ borderBottomColor: 'rgb(44, 62, 80)' }}>
+                            <Label className="text-black text-xs font-semibold">Budget(Per Pax)</Label>
+                            <Select onValueChange={(v) => setValue("budget", v)}>
+                              <SelectTrigger className="h-10 bg-transparent border-0 border-b-2 text-black rounded-none px-0 focus:border-[#1A252F]" style={{ borderBottomColor: '#1A252F' }}>
                                 <SelectValue placeholder="Select range" />
                               </SelectTrigger>
                               <SelectContent className="bg-white border-2 rounded-xl" style={{ borderColor: '#2563eb' }}>
@@ -899,7 +915,9 @@ export function TravelForm() {
 
                           {/* Adults */}
                           <div className="space-y-2">
-                            <Label className="text-[#1A252F] text-xs font-semibold">Adults</Label>
+                            <Label className="text-[#1A252F] text-xs font-semibold flex items-center gap-2">
+                              Adults <span style={{ color: '#ef4444' }}>*</span>
+                            </Label>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -908,11 +926,11 @@ export function TravelForm() {
                                   const newValue = Math.max(1, current - 1);
                                   setValue("adults", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7  bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 -
                               </button>
-                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.adults || 1}
                               </div>
                               <button
@@ -922,7 +940,7 @@ export function TravelForm() {
                                   const newValue = Math.min(8, current + 1);
                                   setValue("adults", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7 bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 +
                               </button>
@@ -932,7 +950,7 @@ export function TravelForm() {
 
                           {/* Children */}
                           <div className="space-y-2">
-                            <Label className="text-[#1A252F] text-xs font-semibold">Children</Label>
+                            <Label className="text-[#1A252F] text-xs font-semibold">Children(2-11 year)</Label>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -941,11 +959,11 @@ export function TravelForm() {
                                   const newValue = Math.max(0, current - 1);
                                   setValue("kids", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7 bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 -
                               </button>
-                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.kids || 0}
                               </div>
                               <button
@@ -955,7 +973,7 @@ export function TravelForm() {
                                   const newValue = Math.min(6, current + 1);
                                   setValue("kids", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7  bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 +
                               </button>
@@ -965,7 +983,7 @@ export function TravelForm() {
 
                           {/* Infants */}
                           <div className="space-y-2">
-                            <Label className="text-[#1A252F] text-xs font-semibold">Infants</Label>
+                            <Label className="text-[#1A252F] text-xs font-semibold">Infants (0-1 year)</Label>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -974,11 +992,11 @@ export function TravelForm() {
                                   const newValue = Math.max(0, current - 1);
                                   setValue("infants", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7 bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 -
                               </button>
-                              <div className="w-12 h-8 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
+                              <div className="w-16 h-10 bg-transparent border-0 border-b-2 text-[#1A252F] text-center flex items-center justify-center" style={{ borderBottomColor: '#2C3E50' }}>
                                 {watchedValues.infants || 0}
                               </div>
                               <button
@@ -988,7 +1006,7 @@ export function TravelForm() {
                                   const newValue = Math.min(4, current + 1);
                                   setValue("infants", newValue);
                                 }}
-                                className="w-6 h-6 rounded-full bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors text-xs"
+                                className="w-8 h-7  bg-[#2C3E50] text-white flex items-center justify-center hover:bg-[#1A252F] transition-colors"
                               >
                                 +
                               </button>
@@ -998,7 +1016,7 @@ export function TravelForm() {
                         </div>
 
                         {/* Submit Buttons */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <HoverRadiusButton
                             text={
                               <div className="flex items-center justify-center sm:justify-start">
@@ -1011,7 +1029,7 @@ export function TravelForm() {
                             }
                             onClick={handleAISubmit}
                             type="submit"
-                            className="h-10 sm:h-12"
+                            className="h-12 sm:h-14"
                           />
 
                           <HoverRadiusButton
@@ -1026,22 +1044,22 @@ export function TravelForm() {
                             }
                             onClick={handleManualSubmit}
                             type="button"
-                            className="h-10 sm:h-12"
+                            className="h-12 sm:h-14"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-
-                        {/* Right Side - Image Container */}
-                        <div className="lg:col-span-1 relative order-3 lg:order-3 hidden lg:flex items-center justify-center p-2">
-                          <ImageContainer className="w-full max-w-[180px]" />
-                        </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
+        
+        {/* Image Container */}
+        <div className="fixed top-1/2 right-8 transform -translate-y-1/2 z-10 hidden lg:block mt-[189px]">
+          <ImageContainer className="w-99" />
+        </div>
       </div>
     </div>
   </motion.div>
@@ -1049,7 +1067,3 @@ export function TravelForm() {
 </>
 );
 };
-
-
-
-

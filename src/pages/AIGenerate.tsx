@@ -507,16 +507,16 @@ export default function AIGenerate() {
             }).join('\n');
           };
 
-          // Optimize attraction selection based on emirates filter and travel form data
-          const attractionCount = tripDays <= 7 ? 15 : tripDays <= 15 ? 12 : 10; // Reduce attractions for longer trips
+          // Optimize attraction selection with Gemini 2.5 Pro's higher capacity
+          const attractionCount = tripDays <= 7 ? 50 : tripDays <= 15 ? 40 : 30; // Increased for Gemini 2.5 Pro
           const selectedEmirates = Array.isArray(data.emirates) ? data.emirates : [data.emirates];
           const optimizedAttractions = optimizeAttractionSelection(attractions, attractionCount);
           const attractionsText = createOptimizedAttractionText(optimizedAttractions);
           
-          // Use smart prompt structure based on trip duration
-          const isLongTrip = tripDays > 10;
-          const hotelCount = isLongTrip ? 6 : 10;
-          const transportCount = isLongTrip ? 5 : 8;
+          // Unified approach for all trip lengths - treat all trips with same detailed structure
+          const isLongTrip = tripDays > 7; // Keep threshold but use same detailed approach
+          const hotelCount = 30; // Use maximum hotel selection for all trips
+          const transportCount = 25; // Use maximum transport options for all trips
 
           console.log(`🎯 Optimizing for ${tripDays}-day trip:`);
           console.log(`- Selected ${optimizedAttractions.length} attractions from ${attractions.length} total`);
@@ -532,10 +532,10 @@ export default function AIGenerate() {
             return randomAttractions;
           }
 
-          // Enhanced AI prompt with better structure and error handling
-          const aiPrompt = `You are an expert UAE travel consultant. Create exactly 3 unique ${tripDays}-day travel packages for ${travelerType} travelers.
+          // Unified AI prompt structure for ALL trip lengths (1-30 days)
+          const aiPrompt = `You are an expert UAE travel consultant. Create exactly 1 optimized ${tripDays}-day travel package for ${travelerType} travelers.
 
-IMPORTANT: Return ONLY valid JSON array. No markdown, no explanations, just the JSON.
+IMPORTANT: Return ONLY valid JSON array with ONE package. No markdown, no explanations, just the JSON.
 
 TRAVELER DETAILS:
 - Group: ${data.adults} adults${data.kids ? `, ${data.kids} children` : ''}${data.infants ? `, ${data.infants} infants` : ''}
@@ -554,7 +554,7 @@ ${hotels.slice(0, hotelCount).map(hotel => {
   const stars = hotel.stars ? `${hotel.stars} stars` : 'Premium';
   const price = hotel.cost_per_night || hotel.price_range_min || 400;
   let desc = hotel.description || 'Quality accommodation';
-  if (desc.length > 60) desc = desc.substring(0, 57) + '...'; // Shorter for long trips
+  if (desc.length > 80) desc = desc.substring(0, 77) + '...';
   return `• ${hotel.name} - ${stars} - ${price} AED/night - ${desc}`;
 }).join('\n')}
 
@@ -562,95 +562,73 @@ TRANSPORT (${Math.min(transport.length, transportCount)} available):
 ${transport.slice(0, transportCount).map(trans => {
   const price = trans.cost_per_day || 150;
   let desc = trans.description || 'Quality transport';
-  if (desc.length > 40) desc = desc.substring(0, 37) + '...'; // Shorter for long trips
+  if (desc.length > 60) desc = desc.substring(0, 57) + '...';
   return `• ${trans.label} - ${price} AED/day - ${desc}`;
 }).join('\n')}
 
 CRITICAL REQUIREMENTS:
-1. Create exactly 3 distinct packages with different themes
-2. Each package must cover all ${tripDays} days with appropriate pacing
-3. ${isLongTrip ? 
-  'For long trips (10+ days): Create week-based sections with key highlights instead of daily details' : 
-  'For shorter trips: Create detailed daily itineraries'}
-4. MANDATORY: Use structured attraction lists with at least 1-3 per section
-5. Use ONLY attraction names from the database list above (copy exact names)
-6. Use ONLY hotel names from the database list above (copy exact names)
-7. Use ONLY transport from the database list above (copy exact names)
-8. Ensure realistic pricing based on database costs
-9. Create unique titles that reflect the package theme
+1. Create exactly 1 optimized package with best theme for ${travelerType}
+2. MANDATORY: Create detailed day-by-day itinerary for ALL ${tripDays} days
+3. Each day must have 2-4 attractions with realistic timing
+4. Use ONLY attraction names from the database list above (copy exact names)
+5. Use ONLY hotel names from the database list above (copy exact names)
+6. Use ONLY transport from the database list above (copy exact names)
+7. Ensure realistic pricing and timing for each day
+8. Create engaging daily titles and descriptions
+9. Include meals, transport, and accommodation for each day
 
-PACKAGE THEMES for ${travelerType}:
-${travelerType === 'solo' ? '- Adventure Explorer\n- Cultural Immersion\n- Luxury Solo Experience' :
-  travelerType === 'family' ? '- Family Fun Adventure\n- Educational Discovery\n- Beach & Resort Relaxation' :
-  travelerType === 'group' ? '- Group Adventure\n- Cultural Exploration\n- Entertainment & Nightlife' :
-  '- Romantic Getaway\n- Adventure & Excitement\n- Luxury & Relaxation'}
+OPTIMAL THEME for ${travelerType}:
+${travelerType === 'solo' ? 'Adventure Explorer - Perfect mix of adventure, culture, and personal discovery' :
+  travelerType === 'family' ? 'Family Fun Adventure - Kid-friendly attractions with educational and entertainment value' :
+  travelerType === 'group' ? 'Group Adventure - Social activities, entertainment, and shared experiences' :
+  'Romantic Getaway - Intimate experiences, luxury, and romantic settings'}
 
-${isLongTrip ? `
-LONG TRIP FORMAT (${tripDays} days - COMPACT Weekly Structure):
-Given the 8,192 output token limit, create COMPACT weekly summaries instead of detailed daily plans.
-Use this ultra-condensed format:
+UNIFIED DAILY STRUCTURE (Works for 1-30 days):
+Use this EXACT format for ALL trip lengths:
 
-COMPACT WEEKLY FORMAT:
-"weeklyHighlights": [
-  {
-    "week": 1,
-    "days": "1-7", 
-    "theme": "Theme Name",
-    "keyAttractions": ["Attraction1", "Attraction2", "Attraction3"],
-    "budget": 3500
-  }
-]
-
-IMPORTANT: For ${tripDays} days, create ${Math.ceil(tripDays / 7)} weeks maximum. Keep descriptions minimal.` : `
-SHORT TRIP FORMAT (${tripDays} days - Standard Daily Structure):
-Create detailed day-by-day itineraries
-
-DAILY FORMAT:
 "itinerary": [
   {
     "day": 1,
-    "title": "Day 1: Title",
-    "attractions": [{"name": "Attraction", "price": 149, "duration": "2h"}],
-    "hotel": "Hotel Name",
-    "transport": "Transport"
+    "title": "Day 1: Arrival & Dubai Icons",
+    "attractions": [
+      {"name": "Burj Khalifa", "price": 149, "duration": "2h", "timing": "10:00 AM - 12:00 PM"},
+      {"name": "Dubai Mall", "price": 0, "duration": "3h", "timing": "2:00 PM - 5:00 PM"}
+    ],
+    "meals": ["Breakfast at Hotel", "Lunch at Dubai Mall", "Dinner at Traditional Restaurant"],
+    "hotel": "Hotel Name from Database",
+    "transport": "Transport from Database",
+    "dailyBudget": 800,
+    "tips": "Arrive early to avoid crowds at Burj Khalifa"
   }
-]`}
+]
 
-Return ONLY a valid JSON array. Use this COMPACT structure to fit within 8,192 output tokens:
+Return ONLY this JSON structure with 1M token capacity:
 [
   {
-    "id": "package_1",
-    "title": "Package Name",
-    "description": "Brief description",
-    "theme": "adventure/cultural/luxury",
-    "totalEstimatedCost": 15000,
+    "id": "optimized_package_1",
+    "title": "Perfect ${tripDays}-Day ${travelerType === 'solo' ? 'Solo Adventure' : travelerType === 'family' ? 'Family Experience' : travelerType === 'group' ? 'Group Adventure' : 'Romantic Journey'}",
+    "description": "Carefully crafted ${tripDays}-day itinerary with ${optimizedAttractions.length} curated attractions",
+    "theme": "${travelerType === 'solo' ? 'adventure' : travelerType === 'family' ? 'family' : travelerType === 'group' ? 'group' : 'romantic'}",
+    "totalEstimatedCost": ${tripDays * 600},
     "duration": ${tripDays},
-    ${isLongTrip ? '"weeklyStructure": true,' : '"weeklyStructure": false,'}
-    ${isLongTrip ? `"weeklyHighlights": [
-      {
-        "week": 1,
-        "days": "1-7",
-        "theme": "Theme",
-        "keyAttractions": ["Attraction1", "Attraction2"],
-        "budget": 3500
-      }
-    ]` : `"itinerary": [
-      {
-        "day": 1,
-        "title": "Day 1: Title",
-        "attractions": [{"name": "Exact Name", "price": 149}],
-        "transport": "Transport"
-      }
-    ]`}
+    "weeklyStructure": false,
+    "itinerary": [
+      // GENERATE ALL ${tripDays} DAYS HERE
+      // Day 1 through Day ${tripDays}
+      // Each day with 2-4 attractions, meals, hotel, transport
+      // Use exact database names only
+      // Realistic timing and pricing
+    ]
   }
 ]
 
 CRITICAL RULES:
 - Return ONLY the JSON array, no other text
-- Use exact names from the database lists provided above
-- Ensure all JSON is properly formatted
-- Calculate realistic costs based on database prices
-- ${isLongTrip ? 'For long trips: Use compact weekly format to fit 8,192 token limit' : 'For short trips: Provide detailed daily schedules'}`;
+- Generate ALL ${tripDays} days in the itinerary array
+- Use exact names from database lists only
+- Each day must have complete details (attractions, meals, hotel, transport, budget)
+- Ensure proper JSON formatting
+- Leverage 1M output token capacity for comprehensive daily details`;
 
           console.log("🤖 AI Prompt Summary:");
           console.log("- Traveler Type:", travelerType);
@@ -664,16 +642,16 @@ CRITICAL RULES:
           console.log("- Budget Range:", data.budget);
           console.log("- Group Size:", `${data.adults} adults + ${data.kids || 0} kids`);
           
-          // More aggressive token limits for longer trips
+          // Gemini 2.5 Pro enhanced token limits - much higher capacity
           const estimatedTokens = Math.ceil(aiPrompt.length / 4);
-          const maxTokens = isLongTrip ? 20000 : 25000; // Lower limit for long trips
+          const maxTokens = isLongTrip ? 2000000 : 3000000; // Gemini 2.5 Pro supports up to 8M input tokens
           
           if (estimatedTokens > maxTokens) {
             console.warn(`⚠️ Prompt too long for ${isLongTrip ? 'long' : 'short'} trip:`, estimatedTokens, "estimated tokens");
             console.log("🔧 Further reducing content for model limits...");
             
-            // Create an even shorter prompt with fewer attractions
-            const ultraCoreCount = isLongTrip ? 6 : 8;
+            // With Gemini 2.5 Pro, we can use more attractions even in fallback mode
+            const ultraCoreCount = isLongTrip ? 25 : 35;
             const coreAttractions = optimizedAttractions.slice(0, ultraCoreCount);
             const shorterPrompt = aiPrompt.replace(
               /ATTRACTIONS \([\s\S]*?(?=\n\nHOTELS)/,
@@ -698,12 +676,13 @@ CRITICAL RULES:
             const aiResponse = await generateContent({ prompt: aiPrompt });
             const rawPackages = await processAIResponse(aiResponse);
             
-            // Enhance packages with actual database images and validate data
+            // Simplified unified processing for ALL trip lengths (1-30 days)
             const enhancedPackages = rawPackages.map((pkg, index) => {
               console.log(`Processing package ${index + 1}:`, pkg.title);
               
+              // All packages now use standard itinerary structure
               const enhancedItinerary = pkg.itinerary?.map((day, dayIndex) => {
-                console.log(`Processing day ${day.day}:`, day);
+                  console.log(`Processing day ${day.day}:`, day);
                 
                 // Ensure we have attractions - if not, add some from database
                 let dayAttractions = day.attractions || [];
@@ -764,19 +743,19 @@ CRITICAL RULES:
                   image: enhancedAttractions[0]?.imageUrl || `https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=400&fit=crop&crop=center`,
                   images: enhancedAttractions.map(attr => attr.imageUrl).filter(Boolean)
                 };
-              }) || [];
+                }) || [];
 
-              // Calculate total cost
-              const totalCost = enhancedItinerary.reduce((sum, day) => 
-                sum + (day.budgetBreakdown?.attractions || 0) + 
-                (day.budgetBreakdown?.meals || 0) + 
-                (day.budgetBreakdown?.transport || 0) + 
-                (day.budgetBreakdown?.accommodation || 0), 0);
+              // Calculate total cost based on daily budgets or fallback calculation
+              const totalCost = enhancedItinerary.reduce((sum, day) => {
+                const dayBudget = day.dailyBudget || day.budget || 
+                  (day.attractions?.reduce((attrSum, attr) => attrSum + (attr.price || 0), 0) || 0) + 400; // 400 for meals/hotel/transport
+                return sum + dayBudget;
+              }, 0);
 
               return {
                 ...pkg,
                 id: `ai_package_${index + 1}`,
-                totalEstimatedCost: totalCost,
+                totalEstimatedCost: totalCost || (tripDays * 600), // Fallback calculation
                 itinerary: enhancedItinerary
               };
             });
