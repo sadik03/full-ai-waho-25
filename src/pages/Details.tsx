@@ -714,10 +714,22 @@ export default function Details() {
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-4">
                                       {/* Enhanced Attractions Section */}
                                       <div className="lg:col-span-2">
-                                        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#1A252F] flex items-center bg-gradient-to-r from-[#AD803B]/10 to-[#AD803B]/5 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-[#AD803B]/20">
-                                          <MapPin className="w-4 sm:w-5 h-4 sm:h-5 mr-2 text-[#AD803B]" />
-                                          <span className="text-sm sm:text-base">Attractions & Activities</span>
-                                        </h3>
+                                        <div className="flex items-center justify-between bg-gradient-to-r from-[#AD803B]/10 to-[#AD803B]/5 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-[#AD803B]/20 mb-3 sm:mb-4">
+                                          <h3 className="text-base sm:text-lg font-semibold text-[#1A252F] flex items-center">
+                                            <MapPin className="w-4 sm:w-5 h-4 sm:h-5 mr-2 text-[#AD803B]" />
+                                            <span className="text-sm sm:text-base">Attractions & Activities</span>
+                                          </h3>
+                                          <motion.button
+                                            onClick={() => handleCustomize(day)}
+                                            className="bg-[#2C3D4F]/10 hover:bg-[#2C3D4F]/20 border border-[#2C3D4F]/30 text-[#2C3D4F] font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-sm flex items-center gap-2"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                          >
+                                            <Edit className="w-3 sm:w-4 h-3 sm:h-4" />
+                                            <span className="hidden sm:inline">Customize</span>
+                                            <span className="sm:hidden">Edit</span>
+                                          </motion.button>
+                                        </div>
                                         <div className="space-y-2 sm:space-y-3">
                                           {day.attractions?.reduce((unique, attraction, index) => {
                                             const isDuplicate = unique.some(item => 
@@ -1047,28 +1059,6 @@ export default function Details() {
                                           </Collapsible>
                                         </div>
 
-                                        {/* Simplified Customize Options Card */}
-                                        <div className="bg-white/90 backdrop-blur-lg border border-[#2C3D4F]/20 rounded-lg sm:rounded-xl shadow-md">
-                                          <div className="p-3 sm:p-4 hover:bg-white/50 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                              <div className="flex items-center">
-                                                <Edit className="w-4 sm:w-5 h-4 sm:h-5 text-[#2C3D4F] mr-2 sm:mr-3" />
-                                                <div className="text-left">
-                                                  <h4 className="font-semibold text-[#1A252F] text-xs sm:text-sm">Customize Attractions</h4>
-                                                  <p className="text-xs text-[#2C3D4F]">Modify day activities</p>
-                                                </div>
-                                              </div>
-                                              <motion.button
-                                                onClick={() => handleCustomize(day)}
-                                                className="bg-[#2C3D4F]/10 hover:bg-[#2C3D4F]/20 border border-[#2C3D4F]/30 text-[#2C3D4F] font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-sm"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                              >
-                                                Edit
-                                              </motion.button>
-                                            </div>
-                                          </div>
-                                        </div>
 
                                         {/* Day Summary Card */}
                                         <div className="bg-gradient-to-br from-[#AD803B]/5 to-[#AD803B]/10 border border-[#AD803B]/30 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-md">

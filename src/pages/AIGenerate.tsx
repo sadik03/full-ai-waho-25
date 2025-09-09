@@ -584,23 +584,55 @@ ${travelerType === 'solo' ? 'Adventure Explorer - Perfect mix of adventure, cult
   'Romantic Getaway - Intimate experiences, luxury, and romantic settings'}
 
 UNIFIED DAILY STRUCTURE (Works for 1-30 days):
-Use this EXACT format for ALL trip lengths:
+Use this EXACT format for ALL trip lengths with proper day numbering:
 
 "itinerary": [
   {
     "day": 1,
     "title": "Day 1: Arrival & Dubai Icons",
     "attractions": [
-      {"name": "Burj Khalifa", "price": 149, "duration": "2h", "timing": "10:00 AM - 12:00 PM"},
-      {"name": "Dubai Mall", "price": 0, "duration": "3h", "timing": "2:00 PM - 5:00 PM"}
+      {"name": "Burj Khalifa", "description": "World's tallest building with stunning panoramic views from observation decks", "price": 149, "duration": "2h", "timing": "10:00 AM - 12:00 PM"},
+      {"name": "Dubai Mall", "description": "Massive shopping mall with 1,200+ stores, aquarium, and entertainment", "price": 0, "duration": "3h", "timing": "2:00 PM - 5:00 PM"}
     ],
     "meals": ["Breakfast at Hotel", "Lunch at Dubai Mall", "Dinner at Traditional Restaurant"],
     "hotel": "Hotel Name from Database",
     "transport": "Transport from Database",
     "dailyBudget": 800,
     "tips": "Arrive early to avoid crowds at Burj Khalifa"
+  },
+  {
+    "day": 2,
+    "title": "Day 2: Cultural Heritage & Modern Marvels",
+    "attractions": [
+      {"name": "Sheikh Zayed Grand Mosque", "description": "Beautiful white marble mosque with stunning Islamic architecture", "price": 0, "duration": "2h", "timing": "9:00 AM - 11:00 AM"},
+      {"name": "Louvre Abu Dhabi", "description": "World-class art museum with collections under a geometric dome", "price": 60, "duration": "3h", "timing": "1:00 PM - 4:00 PM"}
+    ],
+    "meals": ["Breakfast at Hotel", "Lunch at Museum Cafe", "Dinner at Local Restaurant"],
+    "hotel": "Hotel Name from Database",
+    "transport": "Transport from Database",
+    "dailyBudget": 750,
+    "tips": "Dress modestly for mosque visit"
+  },
+  {
+    "day": 3,
+    "title": "Day 3: Adventure & Entertainment",
+    "attractions": [
+      {"name": "Ferrari World", "description": "Ferrari-themed park with world's fastest roller coaster", "price": 300, "duration": "6h", "timing": "10:00 AM - 4:00 PM"}
+    ],
+    "meals": ["Breakfast at Hotel", "Lunch at Theme Park", "Dinner at Premium Restaurant"],
+    "hotel": "Hotel Name from Database", 
+    "transport": "Transport from Database",
+    "dailyBudget": 900,
+    "tips": "Book fast track tickets to avoid queues"
   }
 ]
+
+IMPORTANT DAY NUMBERING RULES:
+- ALWAYS start with "Day 1:" in the title
+- Continue sequentially: "Day 2:", "Day 3:", "Day 4:", etc.
+- Generate ALL days from Day 1 to Day ${tripDays}
+- Each day must have unique attractions and experiences
+- Vary daily themes: arrival, culture, adventure, relaxation, shopping, etc.
 
 Return ONLY this JSON structure with 1M token capacity:
 [
@@ -614,21 +646,33 @@ Return ONLY this JSON structure with 1M token capacity:
     "weeklyStructure": false,
     "itinerary": [
       // GENERATE ALL ${tripDays} DAYS HERE
-      // Day 1 through Day ${tripDays}
-      // Each day with 2-4 attractions, meals, hotel, transport
-      // Use exact database names only
-      // Realistic timing and pricing
+      // MANDATORY: Start with Day 1, Day 2, Day 3... up to Day ${tripDays}
+      // Each day MUST follow this exact format:
+      // {
+      //   "day": 1,
+      //   "title": "Day 1: [Theme Description]",
+      //   "attractions": [{"name": "Exact DB Name", "description": "Brief description highlighting key features", "price": 149, "duration": "2h", "timing": "10:00 AM - 12:00 PM"}],
+      //   "meals": ["Breakfast at Hotel", "Lunch at Location", "Dinner at Restaurant"],
+      //   "hotel": "Exact Hotel Name from Database",
+      //   "transport": "Exact Transport from Database",
+      //   "dailyBudget": 800,
+      //   "tips": "Helpful tip for the day"
+      // }
+      // Continue for ALL ${tripDays} days with sequential numbering
     ]
   }
 ]
 
 CRITICAL RULES:
 - Return ONLY the JSON array, no other text
-- Generate ALL ${tripDays} days in the itinerary array
+- Generate ALL ${tripDays} days in the itinerary array with sequential numbering
+- MANDATORY: Use "Day 1:", "Day 2:", "Day 3:" format in ALL day titles
 - Use exact names from database lists only
-- Each day must have complete details (attractions, meals, hotel, transport, budget)
-- Ensure proper JSON formatting
-- Leverage 1M output token capacity for comprehensive daily details`;
+- MANDATORY: Include concise "description" field for EVERY attraction with brief key features
+- Each day must have complete details (attractions with descriptions, meals, hotel, transport, budget)
+- Ensure proper JSON formatting with sequential day numbers (1, 2, 3, 4, 5...)
+- Leverage 1M output token capacity for comprehensive daily details and rich attraction descriptions
+- NO GAPS in day numbering - must be continuous from 1 to ${tripDays}`;
 
           console.log("🤖 AI Prompt Summary:");
           console.log("- Traveler Type:", travelerType);
